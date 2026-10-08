@@ -2,8 +2,8 @@
    Dopóki SUPABASE_URL i SUPABASE_ANON_KEY są puste, tryb turniejowy działa jako DEMO
    (wpisy tylko w tej przeglądarce). Klucz publiczny (publishable / anon) można tu wpisać. */
 window.BOGOWIE_CONFIG = {
-  SUPABASE_URL: '',
-  SUPABASE_ANON_KEY: '',
+  SUPABASE_URL: 'https://oitzaipjhzbmvijngorp.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_kjk79GonWnCWaiyJTJS3hw_yz08AkCJ',
 
   // Okno eventu (czas polski). Muszą się zgadzać z supabase/schema.sql.
   EVENT_START: '2026-10-08',
