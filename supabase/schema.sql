@@ -1,6 +1,7 @@
 -- TheBogowieTournament — baza w Supabase.
 -- Wklej całość w Supabase → SQL Editor → Run. Można uruchamiać wielokrotnie.
 -- Bez logowania: gracz podaje nick. Zasady pilnowane tutaj, po stronie serwera:
+--   * losowanie: najpierw klasa, potem rasa (równe szanse klas),
 --   * jeden wpis na nick na dzień (wielkość liter bez znaczenia),
 --   * dzień: od startu eventu do dziś (czas polski), nigdy w przyszłość, najpóźniej deadline,
 --   * całe losowanie robi serwer, więc odświeżanie strony nic nie zmienia,
@@ -86,7 +87,7 @@ declare
   v_today  date := (now() at time zone 'Europe/Warsaw')::date;
   v_races  text[];
   v_cls    text[];
-  v_race   text;
+  v_class  text;
   v_s1     jsonb := '[]'::jsonb;
   v_s2     jsonb := '[]'::jsonb;
   v_counts int[] := array[0, 0, 0];
@@ -107,15 +108,17 @@ begin
   -- Ten sam nick zawsze w tej samej pisowni, w jakiej padł pierwszy raz.
   v_nick := coalesce((select nick from public.entries where lower(nick) = lower(v_nick) order by created_at limit 1), v_nick);
 
-  select array_agg(distinct race_id) into v_races from public.combos where faction = p_faction;
+  -- Etap 1: trzy razy klasa z całej frakcji (każda klasa ma równe szanse).
+  select array_agg(distinct class) into v_cls from public.combos where faction = p_faction;
   for i in 1..3 loop
-    v_s1 := v_s1 || jsonb_build_array(public._draw_round(v_races));
+    v_s1 := v_s1 || jsonb_build_array(public._draw_round(v_cls));
   end loop;
 
+  -- Etap 2: dla każdej wylosowanej klasy — rasy, które mogą nią grać.
   for i in 0..2 loop
-    v_race := v_s1 -> i ->> 'winner';
-    select array_agg(class) into v_cls from public.combos where faction = p_faction and race_id = v_race;
-    v_s2 := v_s2 || jsonb_build_array(public._draw_round(v_cls) || jsonb_build_object('race', v_race));
+    v_class := v_s1 -> i ->> 'winner';
+    select array_agg(race_id) into v_races from public.combos where faction = p_faction and class = v_class;
+    v_s2 := v_s2 || jsonb_build_array(public._draw_round(v_races) || jsonb_build_object('cls', v_class));
   end loop;
 
   loop
@@ -129,11 +132,11 @@ begin
   values (
     v_nick, p_faction, p_date,
     jsonb_build_object(
-      'faction', p_faction, 'stage1', v_s1, 'stage2', v_s2,
+      'order', 'class', 'faction', p_faction, 'stage1', v_s1, 'stage2', v_s2,
       'final', jsonb_build_object('sequence', to_jsonb(v_seq), 'target', v_target, 'winnerSlot', v_pick)
     ),
-    v_s2 -> v_pick ->> 'race',
-    v_s2 -> v_pick ->> 'winner'
+    v_s2 -> v_pick ->> 'winner',
+    v_s2 -> v_pick ->> 'cls'
   )
   returning * into v_row;
   return v_row;

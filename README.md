@@ -10,8 +10,8 @@ Bez konfiguracji Supabase strona działa w **trybie demo**: wpisy turniejowe zap
 
 ## Zasady turnieju
 
-1. **Etap 1 · Rasy:** 5 ras frakcji → 3 → 1. Trzy razy: Rasa A, B, C (mogą się powtarzać).
-2. **Etap 2 · Klasy:** dla każdej rasy do 5 jej klas → 3 → 1. Wychodzą Combo 1, 2, 3.
+1. **Etap 1 · Klasy:** 5 z 9 klas frakcji → 3 → 1. Trzy razy: Klasa A, B, C (mogą się powtarzać). Każda klasa ma równe szanse.
+2. **Etap 2 · Rasy:** dla każdej klasy do 5 ras, które mogą nią grać → 3 → 1. Wychodzą Combo 1, 2, 3.
 3. **Finał · Bo7:** losujemy spośród 3 combo, aż któreś trafi 4 razy.
 
 Całe losowanie w turnieju robi serwer (`supabase/schema.sql`), więc odświeżanie strony nic nie zmienia.

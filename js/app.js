@@ -57,7 +57,7 @@
     return `<div class="card race ${extra || ''}" data-v="${esc(id)}"><div class="card-ico">${I.race(id)}</div><div class="card-name${raceName(id).length > 12 ? ' long' : ''}">${esc(raceName(id))}</div></div>`;
   }
   function classCard(cls, raceId, extra) {
-    return `<div class="card cls ${extra || ''}" data-v="${esc(cls)}" style="--cc:${B.CLASS_COLORS[cls] || '#999'}"><div class="card-ico">${I.cls(cls)}</div><div class="card-name">${esc(cls)}</div><div class="card-sub">${esc(raceName(raceId))}</div></div>`;
+    return `<div class="card cls ${extra || ''}" data-v="${esc(cls)}" style="--cc:${B.CLASS_COLORS[cls] || '#999'}"><div class="card-ico">${I.cls(cls)}</div><div class="card-name">${esc(cls)}</div>${raceId ? `<div class="card-sub">${esc(raceName(raceId))}</div>` : ''}</div>`;
   }
   function mysteryCard() {
     return `<div class="card mystery"><div class="card-ico">${I.mystery()}</div><div class="card-name">???</div></div>`;
@@ -150,12 +150,21 @@
 
   function Reveal(container, result, opts) {
     opts = opts || {};
+    const byClass = result.order === 'class';
+    const S1 = byClass ? 'Klasa' : 'Rasa';
+    const combos = B.combosOf(result);
     const rounds = [];
-    result.stage1.forEach((r, i) => rounds.push({ stage: 1, i, kind: 'race', data: r, title: `Losowanie ${i + 1}/3 → Rasa ${SLOT[i]}` }));
-    result.stage2.forEach((r, i) => rounds.push({ stage: 2, i, kind: 'class', data: r, title: `Losowanie ${i + 1}/3 → Combo ${i + 1} (${raceName(r.race)})` }));
-    const beats = [];
-    rounds.forEach((r, ri) => ['show', 'cut', 'crown'].forEach(phase => beats.push({ ri, phase })));
+    result.stage1.forEach((r, i) => rounds.push({ stage: 1, i, kind: byClass ? 'class' : 'race', data: r, title: `Losowanie ${i + 1}/3 → ${S1} ${SLOT[i]}` }));
+    result.stage2.forEach((r, i) => rounds.push({ stage: 2, i, kind: byClass ? 'race' : 'class', data: r, title: `Losowanie ${i + 1}/3 → Combo ${i + 1} (${byClass ? r.cls : raceName(r.race)})` }));
+    // Przy 3 lub mniej kandydatach nie ma kogo wywalać, a przy 1 nie ma nawet wyboru.
+    const beats = [], roundEnd = [];
+    rounds.forEach((r, ri) => {
+      (r.data.contenders.length > 3 ? ['show', 'cut', 'crown'] : ['show', 'crown']).forEach(phase => beats.push({ ri, phase }));
+      roundEnd[ri] = beats.length;
+    });
+    const finalStart = beats.length;
     result.final.sequence.forEach((slot, k) => beats.push({ final: true, k }));
+    const cardOf = (round, v, cls) => round.kind === 'race' ? raceCard(v, cls) : classCard(v, round.stage === 2 ? round.data.race : null, cls);
     const target = result.final.target || 4;
 
     let pos = 0, busy = false;
@@ -205,25 +214,24 @@
       setTimeout(() => s.remove(), 1300);
     };
 
-    function roundDone(ri) { return pos >= ri * 3 + 3; }
+    function roundDone(ri) { return pos >= roundEnd[ri]; }
     function finalCounts(upto) {
       const c = [0, 0, 0];
       result.final.sequence.slice(0, upto).forEach(s => c[s]++);
       return c;
     }
-    const finalStart = rounds.length * 3;
 
     function renderSide() {
-      const rasy = result.stage1.map((r, i) => roundDone(i)
-        ? `<li><b>Rasa ${SLOT[i]}</b><span class="mini">${I.race(r.winner)}</span>${esc(raceName(r.winner))}</li>`
-        : `<li class="empty"><b>Rasa ${SLOT[i]}</b>czeka…</li>`).join('');
-      const combos = result.stage2.map((r, i) => roundDone(3 + i)
-        ? `<li><b>Combo ${i + 1}</b>${comboChip(r.race, r.winner)}</li>`
+      const first = result.stage1.map((r, i) => roundDone(i)
+        ? `<li><b>${S1} ${SLOT[i]}</b><span class="mini">${byClass ? I.cls(r.winner) : I.race(r.winner)}</span>${esc(byClass ? r.winner : raceName(r.winner))}</li>`
+        : `<li class="empty"><b>${S1} ${SLOT[i]}</b>czeka…</li>`).join('');
+      const combosHtml = combos.map((c, i) => roundDone(3 + i)
+        ? `<li><b>Combo ${i + 1}</b>${comboChip(c.race, c.cls)}</li>`
         : `<li class="empty"><b>Combo ${i + 1}</b>czeka…</li>`).join('');
       side.innerHTML = `
         <div class="side-faction">${I.faction(result.faction)}<span>${esc(B.FACTION_PL[result.faction])}</span></div>
-        <h4>Etap 1 · Rasy</h4><ul class="slots">${rasy}</ul>
-        <h4>Etap 2 · Combo</h4><ul class="slots">${combos}</ul>
+        <h4>Etap 1 · ${byClass ? 'Klasy' : 'Rasy'}</h4><ul class="slots">${first}</ul>
+        <h4>Etap 2 · Combo</h4><ul class="slots">${combosHtml}</ul>
         <h4>Finał · Bo7</h4><p class="muted small">Pierwsze combo z ${target} trafieniami wygrywa.</p>`;
     }
 
@@ -235,7 +243,7 @@
         const out = !d.advancing.includes(v);
         if ((phase === 'cut' || phase === 'crown') && out) cls += ' out';
         if (phase === 'crown') cls += v === d.winner ? ' crowned' : (out ? '' : ' dim');
-        return round.kind === 'race' ? raceCard(v, cls) : classCard(v, d.race, cls);
+        return cardOf(round, v, cls);
       }).join('');
     }
 
@@ -248,7 +256,7 @@
 
     function renderRound(ri, phase) {
       const round = rounds[ri];
-      $('.rv-stage', container).textContent = round.stage === 1 ? 'ETAP 1 · RASY' : 'ETAP 2 · KLASY';
+      $('.rv-stage', container).textContent = (round.kind === 'race' ? `ETAP ${round.stage} · RASY` : `ETAP ${round.stage} · KLASY`);
       $('.rv-title', container).textContent = round.title;
       area.innerHTML = `<div class="cards">${cardsFor(round, phase)}</div>`;
       addStamps();
@@ -258,14 +266,14 @@
       const c = finalCounts(upto);
       $('.rv-stage', container).textContent = 'FINAŁ · BO7';
       $('.rv-title', container).textContent = `Kto pierwszy trafi ${target} razy, ten wygrywa`;
-      const cards = result.stage2.map((r, i) => {
+      const cards = combos.map((r, i) => {
         const pips = Array.from({ length: target }, (_, p) => `<i class="${p < c[i] ? 'on' : ''}"></i>`).join('');
         const mp = c[i] === target - 1;
-        return `<div class="fcard ${highlight === i ? 'hot' : ''} ${mp ? 'matchpoint' : ''}" data-slot="${i}" style="--cc:${B.CLASS_COLORS[r.winner]}">
+        return `<div class="fcard ${highlight === i ? 'hot' : ''} ${mp ? 'matchpoint' : ''}" data-slot="${i}" style="--cc:${B.CLASS_COLORS[r.cls]}">
           ${mp ? '<span class="mp-tag">MECZBOL</span>' : ''}
           <div class="fcard-tag">Combo ${i + 1}</div>
-          <div class="fcard-icos">${I.race(r.race)}${I.cls(r.winner)}</div>
-          <div class="fcard-name">${esc(B.comboLabel(r.race, r.winner))}</div>
+          <div class="fcard-icos">${I.race(r.race)}${I.cls(r.cls)}</div>
+          <div class="fcard-name">${esc(B.comboLabel(r.race, r.cls))}</div>
           <div class="pips" aria-label="${c[i]} z ${target}">${pips}</div></div>`;
       }).join('');
       const log = result.final.sequence.slice(0, upto).map((s, k) => `<span class="logchip">${k + 1}. Combo ${s + 1}</span>`).join('');
@@ -316,9 +324,9 @@
       } else {
         const r = rounds[b.ri];
         const nOut = r.data.contenders.length - 3;
-        if (b.phase === 'show') label = b.ri === 0 ? 'LOSUJ KANDYDATÓW' : `DALEJ: ${r.stage === 1 ? 'Rasa ' + SLOT[r.i] : 'Combo ' + (r.i + 1)}`;
+        if (b.phase === 'show') label = b.ri === 0 ? 'LOSUJ KANDYDATÓW' : `DALEJ: ${r.stage === 1 ? S1 + ' ' + SLOT[r.i] : 'Combo ' + (r.i + 1)}`;
         else if (b.phase === 'cut') label = `WYWAL ${nOut}`;
-        else label = 'WYBIERZ 1';
+        else label = r.data.contenders.length === 1 ? 'NO TO BIERZ, CO DAJĄ' : 'WYBIERZ 1';
       }
       nextBtn.textContent = label;
       nextBtn.disabled = busy;
@@ -391,7 +399,7 @@
         S.play('drum');
         $$('.card', area).forEach(c => c.classList.add('shake'));
         await sleep(T(1300));
-        const html = round.data.contenders.map(v => round.kind === 'race' ? raceCard(v) : classCard(v, round.data.race));
+        const html = round.data.contenders.map(v => cardOf(round, v));
         const nodes = $$('.card', area);
         for (let k = 0; k < nodes.length; k++) {
           const tmp = document.createElement('div');
@@ -402,7 +410,8 @@
           S.play('flip');
           await sleep(T(260));
         }
-        say('No to mamy kandydatów. Ktoś zaraz odpadnie.');
+        const n = round.data.contenders.length;
+        say(n === 1 ? 'Jeden kandydat na krzyż. Zero wyboru, zero litości.' : n <= 3 ? 'Mało ich, nikt nie odpada. Ale wygra tylko jeden.' : 'No to mamy kandydatów. Ktoś zaraz odpadnie.');
       } else if (b.phase === 'cut') {
         const losers = $$('.card', area).filter(c => !round.data.advancing.includes(c.dataset.v));
         for (let li = 0; li < losers.length; li++) {
@@ -423,11 +432,14 @@
       } else {
         const alive = $$('.card', area).filter(c => !c.classList.contains('out'));
         const idx = alive.findIndex(c => c.dataset.v === round.data.winner);
-        say(pickOne(LINES.crown), true);
+        say(alive.length === 1 ? 'Nie ma wyboru, frajerze. Bierzesz, co dają.' : pickOne(LINES.crown), true);
         S.play('drum');
         await sleep(T(900));
-        const fake = B.randInt(2) === 0;
-        if (fake) {
+        const fake = alive.length > 1 && B.randInt(2) === 0;
+        if (alive.length === 1) {
+          alive[0].classList.add('hot');
+          await sleep(T(700));
+        } else if (fake) {
           const near = (idx + alive.length - 1) % alive.length;
           await roulette(alive, near, 3, 650);
           say('TO TEN?!', true);
@@ -448,8 +460,10 @@
         w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
         S.play('crown');
-        if (round.kind === 'class') comboVoice(round.data.race, round.data.winner);
-        else S.voice('race:' + round.data.winner);
+        if (round.stage === 2) {
+          const c = combos[round.i];
+          S.voice(`combo:${c.race}|${c.cls}`) || S.voice(byClass ? 'race:' + c.race : 'class:' + c.cls);
+        } else S.voice((round.kind === 'class' ? 'class:' : 'race:') + round.data.winner);
         say(`${w.querySelector('.card-name').textContent}! Jedni się cieszą, reszta płacze w poduszkę.`, true);
       }
       pos++;
@@ -695,14 +709,15 @@
   function entryCard(e) {
     const r = e.result || {};
     const fin = r.final ? (() => { const c = [0, 0, 0]; r.final.sequence.forEach(s => c[s]++); return c.join(':'); })() : '';
-    const rasy = (r.stage1 || []).map((x, i) => `<span class="pill">${SLOT[i]}: <span class="mini">${I.race(x.winner)}</span>${esc(raceName(x.winner))}</span>`).join('');
-    const combos = (r.stage2 || []).map((x, i) => `<span class="pill">${i + 1}: ${comboChip(x.race, x.winner)}</span>`).join('');
+    const byClass = r.order === 'class';
+    const first = (r.stage1 || []).map((x, i) => `<span class="pill">${SLOT[i]}: <span class="mini">${byClass ? I.cls(x.winner) : I.race(x.winner)}</span>${esc(byClass ? x.winner : raceName(x.winner))}</span>`).join('');
+    const combos = r.stage2 ? B.combosOf(r).map((c, i) => `<span class="pill">${i + 1}: ${comboChip(c.race, c.cls)}</span>`).join('') : '';
     const seq = r.final ? r.final.sequence.map(s => `<span class="logchip">${s + 1}</span>`).join('') : '';
     return `<article class="entry">
       <header>${avatar(e.nick, 40)}<b>${esc(e.nick)}</b><span class="mini fac">${I.faction(e.faction)}</span><span class="muted small">${esc(B.FACTION_PL[e.faction] || e.faction)}</span></header>
       <div class="entry-win">${comboChip(e.winner_race, e.winner_class)}<span class="muted small">finał ${fin}</span></div>
       <details><summary>Jak do tego doszło</summary>
-        <p class="small"><b>Rasy:</b> ${rasy}</p>
+        <p class="small"><b>${byClass ? 'Klasy' : 'Rasy'}:</b> ${first}</p>
         <p class="small"><b>Combo:</b> ${combos}</p>
         <p class="small"><b>Finał, kolejne trafienia:</b> ${seq}</p>
       </details>

@@ -82,13 +82,19 @@
     return RACES.filter(r => r.faction === faction);
   }
 
-  // Cały turniej: 3× wybór rasy, 3× wybór klasy dla tej rasy, finał do `target` trafień.
+  function classesOf(faction) {
+    const races = racesOf(faction);
+    return CLASSES.filter(cls => races.some(r => r.classes.includes(cls)));
+  }
+
+  // Cały turniej: 3× wybór klasy, 3× wybór rasy dla tej klasy, finał do `target` trafień.
+  // Najpierw klasa, bo wtedy każda klasa ma równe szanse (Warrior nie dominuje).
   function runTournament(faction, target) {
     if (!FACTION_PL[faction]) throw new Error('Wybierz frakcję');
     target = target || 4;
-    const raceIds = racesOf(faction).map(r => r.id);
-    const stage1 = [0, 1, 2].map(() => drawRound(raceIds));
-    const stage2 = stage1.map(r => Object.assign({ race: r.winner }, drawRound(RACE_BY_ID[r.winner].classes)));
+    const stage1 = [0, 1, 2].map(() => drawRound(classesOf(faction)));
+    const stage2 = stage1.map(r => Object.assign({ cls: r.winner },
+      drawRound(racesOf(faction).filter(x => x.classes.includes(r.winner)).map(x => x.id))));
     const counts = [0, 0, 0];
     const sequence = [];
     let pick;
@@ -97,12 +103,16 @@
       sequence.push(pick);
       counts[pick]++;
     } while (counts[pick] < target);
-    return { faction, stage1, stage2, final: { sequence, target, winnerSlot: pick } };
+    return { order: 'class', faction, stage1, stage2, final: { sequence, target, winnerSlot: pick } };
+  }
+
+  // Trzy combo z etapu 2. Obsługuje też stare wpisy losowane w kolejności rasa → klasa.
+  function combosOf(result) {
+    return result.stage2.map(r => result.order === 'class' ? { race: r.winner, cls: r.cls } : { race: r.race, cls: r.winner });
   }
 
   function winnerOf(result) {
-    const s = result.stage2[result.final.winnerSlot];
-    return { race: s.race, cls: s.winner };
+    return combosOf(result)[result.final.winnerSlot];
   }
 
   function comboLabel(raceId, cls) {
@@ -112,6 +122,6 @@
   window.Bogowie = window.Bogowie || {};
   Object.assign(window.Bogowie, {
     CLASSES, CLASS_COLORS, RACES, RACE_BY_ID, RACE_MEMES, CLASS_MEMES, FACTION_PL,
-    randInt, shuffle, drawRound, racesOf, runTournament, winnerOf, comboLabel
+    randInt, shuffle, drawRound, racesOf, classesOf, runTournament, combosOf, winnerOf, comboLabel
   });
 })();
