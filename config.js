@@ -35,17 +35,20 @@ window.BOGOWIE_CONFIG = {
   //   human, dwarf, nightelf, gnome, highorder.
   SFX: {
     win: 'sfx/levelup.mp3',
-    final: ['sfx/final1.mp3', 'sfx/final2.mp3', 'sfx/final3.mp3', 'sfx/final4.mp3', 'sfx/final5.mp3'],
+    final: ['sfx/final1.mp3', 'sfx/final2.mp3', 'sfx/final3.mp3', 'sfx/final4.mp3', 'sfx/final5.mp3', 'sfx/final6.mp3', 'sfx/final8.mp3'],
     matchpoint: 'sfx/maczbol1.mp3',
     readycheck: 'sfx/readycheck.mp3',
 
     'player:Bartas': 'sfx/bartas.mp3',
     'player:VenQ': 'sfx/venq.mp3',
     'player:Cebulka': 'sfx/cebulka.mp3',
+    'player:Hazeg': 'sfx/hazeg.mp3',
+    'player:Eroth': 'sfx/eroth.mp3',
+    'player:Eerion': 'sfx/eerion.mp3',
 
     'race:dwarf': 'sfx/dwarf1.mp3',
 
-    'class:Druid': ['sfx/bartek-i-druid.mp3', 'sfx/druid2.mp3', 'sfx/feraldruid1.mp3'],
+    'class:Druid': ['sfx/bartek-i-druid.mp3', 'sfx/druid2.mp3', 'sfx/druid3.mp3', 'sfx/feraldruid1.mp3'],
     'class:Hunter': ['sfx/hunter1.mp3', 'sfx/hunter2.mp3'],
     'class:Mage': 'sfx/mage1.mp3',
     'class:Paladin': 'sfx/paladin1.mp3',

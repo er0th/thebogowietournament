@@ -13,7 +13,8 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pickOne = arr => arr[B.randInt(arr.length)];
 
-  const STAMPS = ['WYPIERDALAJ', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'SPADAJ'];
+  const STAMPS = ['WYPIERDALAJ', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'SPADAJ',
+    'KICK Z GILDII', 'WIPE', 'DO KOSZA', 'NIE DZIŚ', 'OUT', 'BYE BYE', 'DEAD', 'AFK NA ZAWSZE', 'GIT GUD', 'L'];
   const SLOT = ['A', 'B', 'C'];
 
   // Turnieje rozpoczęte w tej przeglądarce, jeszcze nie odsłonięte (wynik + token odsłonięcia).
@@ -199,11 +200,19 @@
     const LINES = {
       show: ['Los tasuje karty i ma na ciebie wyjebane.', 'Ktoś tu zaraz zapłacze jak dziecko.', 'Pomódl się do RNG, i tak nie pomoże.', 'Nie patrz. Albo patrz, chuj z tym.', 'Czujesz ten zapach? To strach. Albo Tauren.'],
       cut: ['Kto pierwszy wypierdala?', 'Zaraz będzie skowyt.', 'Pakujcie manatki, frajerzy.', 'Ktoś dziś wraca do domu z płaczem.', 'Kurwa, kogo tu wyjebać…'],
-      crown: ['BĘBNY…', 'Zaciśnij pośladki.', 'To jest TEN moment, kurwa.', 'Jeszcze… jeszcze…', 'Nogi się trzęsą jak po pięciu monsterach.'],
-      final: ['Kręcimy, kurwa!', 'Ojojoj…', 'Kto to zgarnie?', 'Serce w gardle, dupa w trokach.', 'Nie mrugaj, bo przegapisz.']
+      crown: ['BĘBNY…', 'Zaciśnij pośladki.', 'To jest TEN moment, kurwa.', 'Jeszcze… jeszcze…', 'Nogi się trzęsą jak po pięciu monsterach.',
+        'Rolujemy need…', 'Kto wygra loot?', 'Oddech wstrzymany.'],
+      final: ['Kręcimy, kurwa!', 'Ojojoj…', 'Kto to zgarnie?', 'Serce w gardle, dupa w trokach.', 'Nie mrugaj, bo przegapisz.',
+        'Raz kozie śmierć.', 'Trzymajcie piwo.', 'Leci, leci…', 'Ktoś tu zaraz zaliczy wipe.', 'Pull! PULL!']
     };
-    const SHOUTS = ['BUM!', 'JEB!', 'ZUG ZUG!', 'PIERDUT!', 'KABOOM!', 'ŁUP!', 'SRU!', 'O KURWA!'];
-    const DEATHS = ['SKOWYT.', 'PŁACZ I ZGRZYTANIE ZĘBAMI.', 'SPIERDALAJ.', 'DO PIACHU.', 'NARA, FRAJERZE.', 'AUUUU.', 'SPADAJ NA DRZEWO.'];
+    const SHOUTS = ['BUM!', 'JEB!', 'ZUG ZUG!', 'PIERDUT!', 'KABOOM!', 'ŁUP!', 'SRU!', 'O KURWA!',
+      'LEEROY!', 'WORK WORK!', 'ŁOMOT!', 'GRRAAAH!', 'TRZASK!', 'O JA PIERDOLĘ!', 'BĘC!', 'CRIT!', 'ONE SHOT!', 'MRGLGLGL!',
+      'FOR THE HORDE!', 'FOR THE ALLIANCE!', 'ŁUBUDU!', 'WOLOLO!', 'RATATATA!', 'HEADSHOT!', 'FATALITY!'];
+    const FINALE = [['BUM!', 'BUM BUM!', 'ZUG ZUG!'], ['JEB!', 'JEB JEB!', 'KONIEC!'], ['LEEROY!', 'JENKINS!', 'GG!'],
+      ['ŁUP!', 'ŁUBUDU!', 'O KURWA!'], ['TRZY…', 'DWA…', 'BOOOM!'], ['WORK!', 'WORK!', 'ZUG ZUG!']];
+    const GG = ['ZUG ZUG', 'GG EZ', 'GG WP', 'FLAWLESS', 'KONIEC', 'WYBRANIEC', 'LOS PRZEMÓWIŁ', 'NO I CHUJ'];
+    const DEATHS = ['SKOWYT.', 'PŁACZ I ZGRZYTANIE ZĘBAMI.', 'SPIERDALAJ.', 'DO PIACHU.', 'NARA, FRAJERZE.', 'AUUUU.', 'SPADAJ NA DRZEWO.',
+      'POSZEDŁ DO SPIRIT HEALERA.', 'WIPE NA TRASHU.', 'ZOSTAJE NA ŁAWCE.', 'IDZIE FARMIĆ ZIOŁA.', 'OUT. JAK TWÓJ DPS.', 'ZEZŁOMOWANY.', 'RESPAWN ZA ROK.'];
     const say = (txt, hot) => { hype.textContent = txt; hype.classList.toggle('hot', !!hot); hype.classList.remove('pop'); void hype.offsetWidth; hype.classList.add('pop'); };
     const quake = (strong) => { box.classList.remove('quake', 'quake-big'); void box.offsetWidth; box.classList.add(strong ? 'quake-big' : 'quake'); };
     const flash = () => { const f = $('.flash', box); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); };
@@ -297,7 +306,7 @@
       area.innerHTML = `
         <div class="winner">
           <img class="mind-blown" src="img/mind-blown.png" alt="Mind blown">
-          <span class="gg">ZUG ZUG</span>
+          <span class="gg">${pickOne(GG)}</span>
           <div class="winner-icos">${I.faction(result.faction)}${I.race(w.race)}${I.cls(w.cls)}</div>
           <div class="winner-name" style="--cc:${B.CLASS_COLORS[w.cls]}">${esc(B.comboLabel(w.race, w.cls))}</div>
           <p class="winner-meme">${esc(B.RACE_MEMES[w.race] || '')}<br>${esc(B.CLASS_MEMES[w.cls] || '')}</p>
@@ -383,10 +392,11 @@
           box.classList.remove('redalert');
           say('KONIEC. ZACIŚNIJ POŚLADKI.', true);
           await sleep(T(1100));
+          const finale = pickOne(FINALE);
           for (let k = 0; k < 3; k++) {
             S.play('boom'); flash(); quake(true);
             kaboom(box, 15 + B.randInt(70), 20 + B.randInt(60), 30);
-            shout(['BUM!', 'BUM BUM!', 'ZUG ZUG!'][k]);
+            shout(finale[k]);
             await sleep(T(650));
           }
           renderSide(); renderDone();
