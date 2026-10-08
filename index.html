@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TheBogowieTournament</title>
+<meta name="description" content="Turniej gildii Bogowie Forever w WoW: Forever. Los wybiera rasę, klasę i zwycięzcę. Ty tylko płaczesz.">
+<meta name="theme-color" content="#120f0d">
+<meta property="og:title" content="TheBogowieTournament">
+<meta property="og:description" content="Los wybiera. Ty płaczesz. Turniej gildii Bogowie Forever.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f2c230'/%3E%3Ctext x='32' y='47' font-size='42' text-anchor='middle' font-family='Impact,sans-serif' fill='%23120f0d'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Rubik:wght@400;600;800&display=swap">
+<style>
+:root{color-scheme:dark;
+  --bg:#120f0d;--bg2:#1c1714;--panel:#211b17;--line:#3a302a;
+  --text:#f5ecd9;--muted:#b9ab97;--gold:#f2c230;--red:#e0412f;--blue:#3b6fe0;--green:#6aa84f;
+  --ink:#120f0d;--paper:#fff8e7;
+  --head:'Anton',Impact,'Arial Narrow Bold',sans-serif;--body:'Rubik',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:
+  radial-gradient(ellipse at 15% -10%,#3a1d16 0,transparent 55%),
+  radial-gradient(ellipse at 95% 10%,#16233f 0,transparent 50%),
+  repeating-linear-gradient(45deg,transparent 0 18px,#ffffff05 18px 19px),var(--bg);
+  color:var(--text);font:16px/1.5 var(--body);min-height:100vh}
+a{color:var(--gold)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.muted{color:var(--muted)}.small{font-size:14px}.center{text-align:center}
+[hidden]{display:none!important}
+.skip{position:absolute;left:12px;top:-60px;background:var(--gold);color:var(--ink);padding:10px 14px;z-index:50;font-weight:800}
+.skip:focus{top:12px}
+
+/* header */
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+header.top{padding:28px 0 10px}
+.topbar{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:center;margin-top:12px}
+.title{font-family:var(--head);font-weight:400;line-height:.92;margin:0;font-size:clamp(44px,6vw,84px);letter-spacing:.01em;text-transform:uppercase;
+  color:#fff;-webkit-text-stroke:2px var(--ink);text-shadow:4px 4px 0 var(--ink),7px 7px 0 var(--red)}
+.title .the{display:block;font-size:.42em;color:var(--gold);text-shadow:3px 3px 0 var(--ink);transform:rotate(-3deg);transform-origin:left;width:max-content}
+.tagline{font-family:var(--head);font-size:clamp(20px,2.6vw,28px);margin:18px 0 6px;text-transform:uppercase;color:var(--gold)}
+.sub{color:var(--muted);max-width:56ch;margin:0}
+.sticker{display:inline-block;background:var(--red);color:#fff;font-family:var(--head);padding:6px 12px;border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);transform:rotate(-4deg);margin-top:14px;text-transform:uppercase;letter-spacing:.04em}
+#photos{display:flex;justify-content:center;gap:0;flex-wrap:wrap;min-height:200px}
+.polaroid{margin:0 -10px;background:#fff;padding:10px 10px 30px;width:clamp(130px,16vw,180px);box-shadow:0 10px 30px #0008;transform:rotate(var(--r));transition:transform .2s;position:relative}
+.polaroid:hover{transform:rotate(0) scale(1.05);z-index:2}
+.polaroid img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.polaroid .ph{aspect-ratio:1;background:repeating-linear-gradient(45deg,#e8dfcb 0 10px,#d9ceb6 10px 20px);display:grid;place-items:center;font-family:var(--head);color:#8a7a62;font-size:22px;text-align:center;line-height:1.1}
+.polaroid figcaption{position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#333;font-size:13px;font-family:'Comic Sans MS','Comic Neue',cursive}
+
+/* nav */
+.nav{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 8px;position:sticky;top:0;z-index:20;padding:10px 0;background:linear-gradient(var(--bg) 70%,transparent)}
+.nav a{font-family:var(--head);text-transform:uppercase;text-decoration:none;color:var(--text);padding:10px 16px;border:3px solid var(--ink);background:var(--panel);box-shadow:3px 3px 0 var(--ink);letter-spacing:.03em;font-size:18px}
+.nav a[aria-current=page]{background:var(--gold);color:var(--ink);transform:rotate(-2deg)}
+.nav a:hover{border-color:var(--gold)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--head);text-transform:uppercase;letter-spacing:.04em;font-size:18px;
+  padding:12px 20px;min-height:44px;border:3px solid var(--ink);background:var(--gold);color:var(--ink);box-shadow:4px 4px 0 var(--ink);text-decoration:none;transition:transform .08s,box-shadow .08s}
+.btn:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink)}
+.btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-big{font-size:24px;padding:14px 28px}
+.btn-ghost{background:var(--panel);color:var(--text);border-color:var(--line);box-shadow:3px 3px 0 #000}
+.btn-sm{font-size:14px;padding:6px 12px;min-height:36px}
+.btn-danger{background:var(--red);color:#fff}
+.btn-discord{background:#5865f2;color:#fff}
+.input{font:inherit;padding:10px 12px;border:3px solid var(--ink);background:var(--paper);color:var(--ink);min-height:44px;width:min(280px,100%);margin:6px 0}
+.tag{background:var(--red);color:#fff;font-size:12px;padding:2px 6px;font-weight:800}
+
+/* sections */
+section.sec{padding:16px 0 60px}
+h2.sec-title{font-family:var(--head);font-weight:400;text-transform:uppercase;font-size:clamp(32px,5vw,52px);margin:10px 0 4px;color:#fff;text-shadow:3px 3px 0 var(--ink)}
+.sec-lead{color:var(--muted);margin:0 0 20px;max-width:70ch}
+.panel{background:var(--panel);border:3px solid var(--ink);box-shadow:6px 6px 0 #000;padding:20px;margin:18px 0}
+.panel h3{font-family:var(--head);font-weight:400;text-transform:uppercase;font-size:24px;margin:0 0 10px;letter-spacing:.02em}
+.panel h3+p{margin-top:-4px}
+.banner{padding:12px 16px;border:3px dashed var(--gold);margin:12px 0;background:#2a2109}
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:18px 0}
+.rule{background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:5px 5px 0 #000;padding:14px 16px}
+.rule:nth-child(2){transform:rotate(1deg)}.rule:nth-child(1){transform:rotate(-1deg)}
+.rule b{font-family:var(--head);font-weight:400;font-size:22px;display:block;text-transform:uppercase}
+.rule p{margin:4px 0 0;font-size:15px}
+
+/* faction picker */
+.faction-row{display:flex;gap:14px;flex-wrap:wrap;margin:6px 0 18px}
+.faction-btn{display:flex;align-items:center;gap:10px;padding:10px 18px 10px 10px;background:var(--bg2);color:var(--text);border:3px solid var(--line);box-shadow:4px 4px 0 #000;font-family:var(--head);font-size:22px;text-transform:uppercase;min-height:64px}
+.faction-btn .ico{width:48px;height:48px}
+.faction-btn.on.horde{border-color:var(--red);background:#3a1512}
+.faction-btn.on.alliance{border-color:var(--blue);background:#14213f}
+.go-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:18px}
+.quick-card{display:flex;align-items:center;gap:16px;margin-top:16px;padding:14px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:5px 5px 0 var(--cc)}
+.quick-card .winner-name{font-size:30px;color:var(--ink);text-shadow:none}
+.quick-card .winner-meme{color:#4a3f33;margin:4px 0 0}
+
+/* reveal */
+.reveal-box{margin:20px 0}
+.reveal{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;background:var(--panel);border:3px solid var(--ink);box-shadow:6px 6px 0 #000;padding:18px;position:relative;overflow:hidden}
+.rv-head{display:flex;flex-direction:column;gap:2px}
+.rv-stage{font-family:var(--head);color:var(--gold);letter-spacing:.12em;font-size:15px}
+.rv-title{font-family:var(--head);font-weight:400;font-size:clamp(22px,3vw,30px);margin:0;text-transform:uppercase}
+.rv-area{min-height:260px;display:flex;flex-direction:column;justify-content:center;padding:18px 0}
+.rv-controls{display:flex;gap:10px;flex-wrap:wrap}
+.rv-side{background:var(--bg2);border:2px solid var(--line);padding:14px}
+.rv-side h4{font-family:var(--head);font-weight:400;text-transform:uppercase;margin:14px 0 6px;color:var(--gold);letter-spacing:.06em}
+.side-faction{display:flex;align-items:center;gap:8px;font-family:var(--head);font-size:20px;text-transform:uppercase}
+.side-faction .ico{width:40px;height:40px}
+.slots{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.slots li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px}
+.slots li b{min-width:66px;font-size:13px;text-transform:uppercase;color:var(--muted)}
+.slots li.empty{color:#7b6f60;font-style:italic}
+
+.cards{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.card{position:relative;width:132px;min-height:168px;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:5px 5px 0 #000;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:12px 8px 10px;text-align:center;transition:transform .15s,opacity .3s,filter .3s,box-shadow .15s}
+.card:nth-child(odd){transform:rotate(-1.5deg)}.card:nth-child(even){transform:rotate(1.5deg)}
+.card.cls{border-bottom:8px solid var(--cc)}
+.card-ico .ico{width:84px;height:84px;display:block}
+.card-name{font-family:var(--head);font-size:18px;line-height:1.05;margin-top:6px;text-transform:uppercase;overflow-wrap:break-word}
+.card-name.long{font-size:15px}
+.card-sub{font-size:12px;color:#6b5d4c;margin-top:2px}
+.card.mystery{background:#2a2420;color:var(--gold);border-color:var(--gold)}
+.card.shake{animation:shake .25s linear infinite}
+.card.flip-in{animation:flip .38s ease-out}
+.card.hot{transform:translateY(-8px) rotate(0) scale(1.06);box-shadow:0 0 0 4px var(--gold),8px 10px 0 #000}
+.card.out{background:#cfc6b4}
+.card.out .card-ico,.card.out .card-name,.card.out .card-sub{filter:grayscale(1);opacity:.4}
+.card.dim{opacity:.7}
+.card.crowned{transform:translateY(-10px) scale(1.1) rotate(-2deg);box-shadow:0 0 0 5px var(--gold),0 0 40px #f2c23088,8px 10px 0 #000;z-index:2}
+.stamp{position:absolute;z-index:3;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-16deg);font-family:var(--head);font-size:24px;color:var(--red);border:4px solid var(--red);padding:2px 8px;background:#fff8e7d0;white-space:nowrap;letter-spacing:.04em}
+.stamp-in{animation:stamp .28s cubic-bezier(.2,1.6,.4,1)}
+.crown-tag{position:absolute;top:-16px;left:50%;transform:translateX(-50%) rotate(-4deg);background:var(--gold);color:var(--ink);font-family:var(--head);font-size:15px;padding:2px 10px;border:3px solid var(--ink);white-space:nowrap}
+@keyframes shake{0%,100%{transform:translateX(0) rotate(-2deg)}25%{transform:translateX(-4px) rotate(2deg)}75%{transform:translateX(4px) rotate(-3deg)}}
+@keyframes flip{0%{transform:rotateY(90deg) scale(.9)}100%{transform:rotateY(0) scale(1)}}
+@keyframes stamp{0%{transform:translate(-50%,-50%) rotate(-16deg) scale(2.4);opacity:0}100%{transform:translate(-50%,-50%) rotate(-16deg) scale(1);opacity:1}}
+
+.fcards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fcard{background:var(--paper);color:var(--ink);border:3px solid var(--ink);border-bottom:8px solid var(--cc);box-shadow:5px 5px 0 #000;padding:12px;text-align:center;transition:transform .12s,box-shadow .12s}
+.fcard.hot{transform:translateY(-6px) scale(1.04);box-shadow:0 0 0 4px var(--gold),8px 10px 0 #000}
+.fcard-tag{font-family:var(--head);font-size:14px;letter-spacing:.1em;color:#6b5d4c}
+.fcard-icos{display:flex;justify-content:center;gap:4px}
+.fcard-icos .ico{width:56px;height:56px}
+.fcard-name{font-family:var(--head);font-size:20px;text-transform:uppercase;line-height:1.05;margin:4px 0 8px}
+.pips{display:flex;justify-content:center;gap:6px}
+.pips i{width:20px;height:20px;border:3px solid var(--ink);border-radius:50%;background:#e8dfcb}
+.pips i.on{background:var(--red);box-shadow:inset 0 0 0 3px #ffb3a8}
+.flog{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.logchip{font-size:13px;background:var(--bg2);border:1px solid var(--line);padding:2px 8px}
+
+.winner{text-align:center;position:relative;padding:10px 0}
+.gg{position:absolute;right:4%;top:30px;font-family:var(--head);font-size:44px;color:var(--red);border:5px solid var(--red);padding:0 12px;transform:rotate(12deg);background:#120f0dcc;animation:stamp-gg .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stamp-gg{0%{transform:rotate(12deg) scale(3);opacity:0}100%{transform:rotate(12deg) scale(1);opacity:1}}
+.winner-icos{display:flex;justify-content:center;gap:6px}
+.winner-icos .ico{width:96px;height:96px;filter:drop-shadow(4px 4px 0 #000)}
+.winner-name{font-family:var(--head);font-size:clamp(34px,6vw,62px);text-transform:uppercase;line-height:1;margin:10px 0;color:#fff;text-shadow:3px 3px 0 var(--ink),6px 6px 0 var(--cc,#f2c230)}
+.winner-meme{font-size:18px;color:var(--text);margin:6px 0 10px}
+.winner-actions{display:flex;justify-content:center;gap:10px;margin-top:14px}
+
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:10px;height:16px;animation:fall linear forwards}
+@keyframes fall{to{top:110%;transform:rotate(720deg) translateX(40px)}}
+
+.combo-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border:2px solid var(--cc);padding:2px 8px 2px 4px;font-weight:600;font-size:14px;color:var(--text)}
+.mini{display:inline-flex}.mini .ico{width:22px;height:22px}
+.pill{display:inline-flex;align-items:center;gap:4px;margin:2px 6px 2px 0}
+
+/* calendars */
+.month{margin-bottom:16px}
+.month h4{font-family:var(--head);font-weight:400;text-transform:uppercase;font-size:20px;margin:6px 0 8px}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dow{text-align:center;font-size:12px;color:var(--muted);font-weight:800}
+.day{min-height:48px;border:2px solid var(--line);background:var(--bg2);color:var(--text);font-weight:800;position:relative}
+.cal.pick .day:not(:disabled):hover{border-color:var(--gold)}
+.day:disabled{opacity:.35;cursor:not-allowed}
+.day.has{opacity:.6;background:#1f2a18;border-color:#3c5a2c}
+.day.sel{background:var(--gold);color:var(--ink);border-color:var(--ink);box-shadow:3px 3px 0 #000}
+.day.today{outline:2px dashed var(--red);outline-offset:-5px}
+.day .tick{position:absolute;right:4px;top:2px;font-style:normal;font-size:12px;color:var(--green)}
+.cal.big .day{min-height:76px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:6px;text-align:left}
+.cal.big .day.future{opacity:.45}
+.cal.big .day.deadline{border-color:var(--red)}
+.cal.big .day.deadline::after{content:'DEADLINE';position:absolute;right:4px;bottom:4px;font-family:var(--head);font-size:10px;color:var(--red);letter-spacing:.06em}
+.avs{display:flex;flex-wrap:wrap;gap:2px;align-items:center}
+.more{font-size:11px;color:var(--muted)}
+.avatar{border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--ink)}
+.avatar-txt{display:inline-grid;place-items:center;color:#fff;font-weight:800}
+.cal-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
+.entries{display:flex;flex-direction:column;gap:12px}
+.entry{background:var(--bg2);border:2px solid var(--line);padding:12px}
+.entry header{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.entry .fac .ico{width:24px;height:24px}
+.entry-win{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.entry details summary{cursor:pointer;color:var(--gold);font-weight:600}
+.btn-del{margin-top:8px;color:#ffb3a8}
+
+.userbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0}
+.history{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.history li{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.history .date{min-width:110px;color:var(--muted)}
+
+/* players */
+.players{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.player{background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:6px 6px 0 #000;padding:14px}
+.player:nth-child(3n+1){transform:rotate(-.6deg)}.player:nth-child(3n+2){transform:rotate(.5deg)}
+.player header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.player header div{display:flex;flex-direction:column}
+.player header b{font-family:var(--head);font-weight:400;font-size:22px;text-transform:uppercase;line-height:1.1}
+.player .muted{color:#6b5d4c}
+.top3{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.top3 li{display:flex;align-items:center;gap:8px}
+.top3 .combo-chip{background:#fff;color:var(--ink)}
+.medal{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--head);border:2px solid var(--ink);flex:none}
+.medal.gold{background:#f2c230}.medal.silver{background:#cfd0da}.medal.bronze{background:#c98a54}
+.cnt{margin-left:auto;font-family:var(--head);font-size:18px}
+
+/* dialog */
+dialog{border:4px solid var(--ink);background:var(--paper);color:var(--ink);padding:0;max-width:560px;width:calc(100% - 32px);box-shadow:10px 10px 0 #000}
+dialog::backdrop{background:#000b}
+.dlg-head{background:var(--red);color:#fff;padding:16px 20px;font-family:var(--head);font-size:clamp(26px,5vw,38px);text-transform:uppercase;line-height:1;transform:rotate(-1deg);margin:-2px -2px 0}
+.dlg-body{padding:18px 20px}
+.dlg-body p{margin:0 0 12px}
+.big-warn{font-family:var(--head);font-size:24px;text-transform:uppercase;line-height:1.1;color:var(--red)}
+#warnWhat{display:flex;align-items:center;gap:10px;background:#efe4cc;padding:8px 10px;border:2px solid var(--ink);margin-bottom:12px}
+#warnWhat .ico{width:36px;height:36px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:600;margin:12px 0}
+.check input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--red)}
+.dlg-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;padding:0 20px 20px}
+.dlg-actions .btn-ghost{background:#e8dfcb;color:var(--ink);border-color:var(--ink)}
+
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,120px);background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:5px 5px 0 #000;padding:12px 16px;font-weight:700;z-index:100;transition:transform .3s;max-width:calc(100% - 32px)}
+.toast.show{transform:translate(-50%,0)}
+.toast.bad{background:#ffd9d3}
+
+footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dashed var(--line);margin-top:20px}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .reveal{grid-template-columns:1fr}
+  .cal-layout{grid-template-columns:1fr}
+  .rules{grid-template-columns:1fr}
+  .fcards{grid-template-columns:1fr}
+  .card{width:104px;min-height:146px}
+  .title{-webkit-text-stroke:1px var(--ink)}
+  .polaroid{width:112px;padding:6px 6px 24px}
+  .polaroid figcaption{font-size:11px}
+  .gg{font-size:30px;top:0}
+  .winner-icos .ico{width:72px;height:72px}
+  .card-ico .ico{width:64px;height:64px}
+  .card-name{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Przejdź do treści</a>
+<div class="wrap">
+  <header class="top">
+    <div class="topbar">
+      <button type="button" class="btn btn-ghost btn-sm" id="fastBtn" aria-pressed="false">Tempo</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="muteBtn" aria-pressed="true">Dźwięk</button>
+    </div>
+    <div class="hero">
+      <div>
+        <h1 class="title"><span class="the">The</span>Bogowie<br>Tournament</h1>
+        <p class="tagline">Los wybiera. Ty płaczesz.</p>
+        <p class="sub">Oficjalny, w pełni nieoficjalny turniej gildii <b>Bogowie Forever</b> w WoW: Forever. Los wybiera rasę, klasę i zwycięzcę. Twoja rola: zaakceptować to z godnością. Albo bez.</p>
+        <span class="sticker">Deadline: <span id="deadlineTxt"></span></span>
+      </div>
+      <div id="photos" aria-label="Zdjęcia ekipy"></div>
+    </div>
+    <nav class="nav" aria-label="Sekcje">
+      <a href="#random">Randomizer</a>
+      <a href="#turniej">Turniej</a>
+      <a href="#kalendarz">Kalendarz</a>
+      <a href="#gracze">Gracze</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="sec" id="sec-random" aria-labelledby="h-random">
+      <h2 class="sec-title" id="h-random">Randomizer dla każdego</h2>
+      <p class="sec-lead">Bez logowania, bez zapisu, bez konsekwencji. Kręć, ile chcesz, i sprawdź, co by cię spotkało w turnieju.</p>
+      <div class="rules">
+        <div class="rule"><b>Etap 1 · Rasy</b><p>Losujemy 5 ras frakcji, 2 odpadają, z 3 zostaje 1. Trzy razy, więc wychodzi Rasa A, B i C. Mogą się dublować.</p></div>
+        <div class="rule"><b>Etap 2 · Klasy</b><p>Dla każdej rasy losujemy do 5 jej klas, 3 przechodzą, 1 zostaje. Tak powstają Combo 1, 2 i 3.</p></div>
+        <div class="rule"><b>Finał · Bo7</b><p>Losujemy w kółko spośród 3 combo. Pierwsze, które trafi 4 razy, wygrywa dzień.</p></div>
+      </div>
+      <div class="panel">
+        <h3>Wybierz frakcję</h3>
+        <div class="faction-row" id="randFaction"></div>
+        <div class="go-row">
+          <button type="button" class="btn btn-big" id="randGo">Losuj cały turniej</button>
+          <button type="button" class="btn btn-ghost" id="quickGo">Szybki strzał: 1 postać</button>
+        </div>
+        <div id="quickOut"></div>
+      </div>
+      <div id="randReveal" class="reveal-box" hidden></div>
+    </section>
+
+    <section class="sec" id="sec-turniej" aria-labelledby="h-turniej" hidden>
+      <h2 class="sec-title" id="h-turniej">Turniej na serio</h2>
+      <p class="sec-lead">Jeden turniej na dzień. Wynik idzie do kalendarza i zostaje tam na zawsze. Zaległy dzień można nadrobić, przyszłego nie.</p>
+      <div id="tourBody"></div>
+    </section>
+
+    <section class="sec" id="sec-kalendarz" aria-labelledby="h-kal" hidden>
+      <h2 class="sec-title" id="h-kal">Kalendarz wyników</h2>
+      <p class="sec-lead">Kto, kiedy i co wylosował. Widzi każdy, wstydzi się tylko zainteresowany.</p>
+      <div class="cal-layout">
+        <div class="panel" id="calGrid"></div>
+        <div class="panel" id="calDetail"></div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-gracze" aria-labelledby="h-gracze" hidden>
+      <h2 class="sec-title" id="h-gracze">Gracze i ich top 3</h2>
+      <p class="sec-lead">Najczęściej wygrywające combo u każdego gracza. Im dłużej trwa event, tym ciekawiej się dubluje.</p>
+      <div id="playersBody"></div>
+    </section>
+  </main>
+
+  <footer>
+    TheBogowieTournament · fanowski projekt gildii Bogowie Forever. Niepowiązany z Blizzard Entertainment. World of Warcraft to znak towarowy Blizzarda. Ikony narysowane od zera, z miłością i bez talentu.
+  </footer>
+</div>
+
+<dialog id="warnDialog" aria-labelledby="warnTitle">
+  <div class="dlg-head" id="warnTitle">Stój, śmiertelniku!</div>
+  <div class="dlg-body">
+    <div id="warnWhat"></div>
+    <p class="big-warn">Wpis jest NIE DO USUNIĘCIA.</p>
+    <p>Jak klikniesz dalej, los od razu wybierze wszystko po stronie serwera, a wynik trafi do kalendarza na amen. Cofnąć może go tylko admin, i to jak będzie w dobrym humorze.</p>
+    <p><b>Zastanów się więc, co wpierdalasz do środka.</b> Dobra frakcja? Dobry dzień?</p>
+    <label class="check"><input type="checkbox" id="warnCheck"> Rozumiem. Biorę to na klatę i nie będę płakać na Discordzie.</label>
+  </div>
+  <div class="dlg-actions">
+    <button type="button" class="btn btn-ghost" id="warnCancel">Jednak nie</button>
+    <button type="button" class="btn btn-danger" id="warnGo" disabled>WCHODZĘ W TO</button>
+  </div>
+</dialog>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="js/core.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/sfx.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
