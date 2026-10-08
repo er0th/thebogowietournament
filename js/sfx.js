@@ -77,23 +77,42 @@
   };
 
   const files = {};
+  let voiceNow = null;
+  const has = name => !!(cfg[name] && (!Array.isArray(cfg[name]) || cfg[name].length));
+  function fileFor(name) {
+    const v = cfg[name];
+    return Array.isArray(v) ? v[Math.floor(Math.random() * v.length)] : v;
+  }
+  function playFile(src, vol) {
+    if (!files[src]) { files[src] = new Audio(src); files[src].preload = 'auto'; }
+    const a = files[src].cloneNode();
+    a.volume = vol == null ? 0.85 : vol;
+    a.play().catch(() => {});
+    return a;
+  }
   function play(name) {
-    if (muted) return;
+    if (muted) return null;
     try {
-      if (cfg[name]) {
-        if (!files[name]) files[name] = new Audio(cfg[name]);
-        const a = files[name].cloneNode();
-        a.volume = 0.8;
-        a.play().catch(() => {});
-        return;
-      }
+      if (has(name)) return playFile(fileFor(name));
       if (SYNTH[name]) SYNTH[name]();
     } catch (e) { /* dźwięk to tylko bonus */ }
+    return null;
+  }
+  // Kwestie głosowe: nowa ucisza poprzednią, żeby się nie nakładały.
+  function voice(name) {
+    if (muted || !has(name)) return false;
+    try {
+      if (voiceNow) { voiceNow.pause(); voiceNow = null; }
+      voiceNow = playFile(fileFor(name), 0.95);
+      return true;
+    } catch (e) { return false; }
   }
 
   window.Bogowie = window.Bogowie || {};
   window.Bogowie.Sfx = {
     play,
+    voice,
+    has,
     isMuted: () => muted,
     toggle() {
       muted = !muted;

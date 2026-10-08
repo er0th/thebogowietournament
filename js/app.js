@@ -15,6 +15,11 @@
 
   const STAMPS = ['WYPIERDALAJ', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'SPADAJ'];
   const SLOT = ['A', 'B', 'C'];
+
+  // Głos combo (rasa+klasa), a jak go nie ma, to klasy.
+  function comboVoice(race, cls) {
+    return S.voice(`combo:${race}|${cls}`) || S.voice(`class:${cls}`);
+  }
   const RAGE_FU = '<img class="rage" src="img/rage-fu.png" alt="">';
   const RAGE_SWEET = '<img class="rage sweet" src="img/rage-sweet.png" alt="">';
 
@@ -348,13 +353,14 @@
         box.classList.toggle('redalert', matchPoint);
         if (matchPoint) {
           say('MECZBOL! Ktoś zaraz zesra się ze stresu…', true);
-          for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
+          if (S.has('matchpoint')) { S.play('matchpoint'); await sleep(T(2200)); }
+          else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
         } else say(pickOne(LINES.final));
         await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
         pos++;
         renderFinal(pos - finalStart, pick);
         const hit = $(`.fcard[data-slot="${pick}"]`, area);
-        S.play('boom'); quake(decisive);
+        S.play(S.has('final') ? 'final' : 'boom'); quake(decisive);
         kabooomAt(hit, decisive ? 30 : 14);
         shout(pickOne(SHOUTS));
         if (pos >= beats.length) {
@@ -370,7 +376,7 @@
           renderSide(); renderDone();
           S.play('win');
           const w = B.winnerOf(result);
-          if (w.cls === 'Druid') S.play('druid');
+          setTimeout(() => comboVoice(w.race, w.cls), 1500);
           confetti(container); poopRain(box); quake(true);
         } else if (finalCounts(pos - finalStart)[pick] === target - 1) {
           say(`Combo ${pick + 1} ma MECZBOLA! Ktoś tu się zaraz posra.`, true);
@@ -442,7 +448,8 @@
         w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
         S.play('crown');
-        if (round.kind === 'class' && round.data.winner === 'Druid') S.play('druid');
+        if (round.kind === 'class') comboVoice(round.data.race, round.data.winner);
+        else S.voice('race:' + round.data.winner);
         say(`${w.querySelector('.card-name').textContent}! Jedni się cieszą, reszta płacze w poduszkę.`, true);
       }
       pos++;
@@ -482,7 +489,8 @@
 
   function enterAs(nick) {
     setNick(nick);
-    S.play('crown');
+    const p = playerOf(nick);
+    if (!S.voice('player:' + (p ? p.nick : nick))) S.play('crown');
     location.hash = '#random';
   }
 
@@ -519,6 +527,7 @@
   function setupRandomizer() {
     factionPicker($('#randFaction'), state.randFaction, f => { state.randFaction = f; });
     $('#randGo').addEventListener('click', () => {
+      S.play('readycheck');
       const result = B.runTournament(state.randFaction, cfg.FINAL_TARGET);
       const box = $('#randReveal');
       box.hidden = false;
@@ -538,7 +547,7 @@
         <div><div class="winner-name">${esc(B.comboLabel(race, cls))}</div>
         <p class="winner-meme">${esc(B.RACE_MEMES[race])} ${esc(B.CLASS_MEMES[cls])}</p></div></div>`;
       S.play('crown');
-      if (cls === 'Druid') S.play('druid');
+      comboVoice(race, cls);
     });
   }
 
@@ -668,6 +677,7 @@
     go.textContent = 'Los się ładuje…';
     try {
       const entry = await api.start(state.nick, state.faction, state.selectedDate);
+      S.play('readycheck');
       $('#warnDialog').close();
       state.entries = await api.listEntries();
       renderAll();

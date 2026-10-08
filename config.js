@@ -26,9 +26,34 @@ window.BOGOWIE_CONFIG = {
     { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' }
   ],
 
-  // Własne dźwięki zamiast syntezatora.
-  // Nazwy: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win, druid.
+  // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
+  // Ogólne: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win,
+  //   final (każde trafienie w finale), matchpoint (meczbol), readycheck (start turnieju).
+  // Głosy: 'race:<id>', 'class:<Klasa>', 'combo:<rasa>|<Klasa>' (ma pierwszeństwo przed klasą),
+  //   'player:<Nick>' (po kliknięciu profilu). Id ras: orc, undead, tauren, troll, windshaper,
+  //   human, dwarf, nightelf, gnome, highorder.
   SFX: {
-    druid: 'sfx/bartek-i-druid.mp3'
+    win: 'sfx/levelup.mp3',
+    final: ['sfx/final1.mp3', 'sfx/final2.mp3', 'sfx/final3.mp3', 'sfx/final4.mp3', 'sfx/final5.mp3'],
+    matchpoint: 'sfx/maczbol1.mp3',
+    readycheck: 'sfx/readycheck.mp3',
+
+    'player:Bartas': 'sfx/bartas.mp3',
+    'player:VenQ': 'sfx/venq.mp3',
+
+    'race:dwarf': 'sfx/dwarf1.mp3',
+
+    'class:Druid': ['sfx/bartek-i-druid.mp3', 'sfx/druid2.mp3', 'sfx/feraldruid1.mp3'],
+    'class:Hunter': 'sfx/hunter1.mp3',
+    'class:Mage': 'sfx/mage1.mp3',
+    'class:Paladin': 'sfx/paladin1.mp3',
+    'class:Priest': ['sfx/priest1.mp3', 'sfx/priest2.mp3', 'sfx/priest3.mp3'],
+    'class:Rogue': ['sfx/rogue1.mp3', 'sfx/rogue2.mp3'],
+    'class:Shaman': 'sfx/shaman1.mp3',
+    'class:Warlock': 'sfx/warlock1.mp3',
+    'class:Warrior': 'sfx/warrior1.mp3',
+
+    'combo:gnome|Mage': 'sfx/gnomemage1.mp3',
+    'combo:tauren|Warrior': 'sfx/warriortauren1.mp3'
   }
 };
