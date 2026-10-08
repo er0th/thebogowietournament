@@ -511,13 +511,25 @@
 
   function renderLanding() {
     const grid = $('#profiles');
-    grid.innerHTML = PLAYERS.map(p => `
+    grid.innerHTML = PLAYERS.map(p => {
+      const sounds = S.list('player:' + p.nick);
+      const play = sounds.map((src, i) => `<button type="button" class="play-btn" data-src="${esc(src)}" aria-label="Odtwórz dźwięk ${esc(p.nick)}${sounds.length > 1 ? ' ' + (i + 1) : ''}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>${sounds.length > 1 ? `<span>${i + 1}</span>` : ''}</button>`).join('');
+      return `<div class="profile-wrap">
       <button type="button" class="profile ${state.nick && sameNick(state.nick, p.nick) ? 'on' : ''}" data-nick="${esc(p.nick)}">
         ${avatar(p.nick, 132)}
         <span class="profile-nick">${esc(p.nick)}</span>
         ${p.tag ? `<span class="profile-tag">${esc(p.tag)}</span>` : ''}
-      </button>`).join('');
+      </button>
+      ${play ? `<div class="play-row">${play}</div>` : ''}
+    </div>`;
+    }).join('');
     $$('.profile', grid).forEach(b => b.addEventListener('click', () => enterAs(b.dataset.nick)));
+    $$('.play-btn', grid).forEach(b => b.addEventListener('click', () => {
+      if (S.isMuted()) { toast('Dźwięk jest wyłączony. Włącz go przyciskiem na górze.'); return; }
+      S.voiceSrc(b.dataset.src);
+      b.classList.remove('ping'); void b.offsetWidth; b.classList.add('ping');
+    }));
     const back = $('#welcomeBack');
     if (state.nick) {
       back.hidden = false;

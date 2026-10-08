@@ -149,10 +149,24 @@
     } catch (e) { return false; }
   }
 
+  // Wszystkie pliki przypisane do danej nazwy (np. 'player:Fintek').
+  const list = name => (has(name) ? [].concat(cfg[name]) : []);
+  // Konkretny plik jako kwestia głosowa (ucisza poprzednią).
+  function voiceSrc(src) {
+    if (muted) return false;
+    try {
+      if (voiceNow) { voiceNow.pause(); voiceNow = null; }
+      voiceNow = playFile(src, 0.95);
+      return true;
+    } catch (e) { return false; }
+  }
+
   window.Bogowie = window.Bogowie || {};
   window.Bogowie.Sfx = {
     play,
     voice,
+    voiceSrc,
+    list,
     has,
     isMuted: () => muted,
     toggle() {

@@ -273,7 +273,15 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .choose .sec-lead{text-align:center;margin:10px auto 22px}
 .profiles{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px}
 .profile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px 12px;background:var(--paper);color:var(--ink);border:4px solid var(--ink);box-shadow:6px 6px 0 #000;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.profile:nth-child(odd){transform:rotate(-1.2deg)}.profile:nth-child(even){transform:rotate(1.2deg)}
+.profile-wrap{display:flex;flex-direction:column;gap:10px}
+.profile-wrap .profile{flex:1}
+.profile-wrap:nth-child(odd) .profile{transform:rotate(-1.2deg)}.profile-wrap:nth-child(even) .profile{transform:rotate(1.2deg)}
+.play-row{display:flex;justify-content:center;gap:8px}
+.play-btn{display:inline-flex;align-items:center;gap:4px;min-height:40px;min-width:48px;justify-content:center;padding:6px 12px;background:var(--panel);color:var(--gold);border:3px solid var(--ink);box-shadow:3px 3px 0 #000;font-family:var(--head);font-size:16px}
+.play-btn svg{width:20px;height:20px}
+.play-btn:hover{border-color:var(--gold);transform:translateY(-1px)}
+.play-btn.ping{animation:ping .4s ease-out}
+@keyframes ping{0%{transform:scale(1.25);background:var(--gold);color:var(--ink)}100%{transform:none}}
 .profile:hover,.profile:focus-visible{transform:translateY(-6px) rotate(0) scale(1.04);box-shadow:10px 12px 0 #000,0 0 0 4px var(--gold)}
 .profile.on{box-shadow:6px 6px 0 #000,0 0 0 5px var(--gold)}
 .profile .avatar{width:132px!important;height:132px!important;border-radius:6px;border:3px solid var(--ink)}
