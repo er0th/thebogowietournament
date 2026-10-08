@@ -16,19 +16,15 @@ window.BOGOWIE_CONFIG = {
   // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga), tag = podpis, aliases = inne nicki.
   PLAYERS: [
     { nick: 'Bartas', photo: 'img/bartas.jpg', tag: 'Bartek i Druid' },
-    { nick: 'Zdzichuj', aliases: ['Adam'], art: 'soon', tag: 'aka Adam' },
-    { nick: 'Eroth', art: 'soon', tag: 'ten od strony' },
+    { nick: 'Zdzichuj', aliases: ['Adam'], photo: 'img/zdzichuj.jpg', tag: 'aka Adam' },
+    { nick: 'Eroth', photo: 'img/eroth.jpg', tag: 'ten od strony' },
     { nick: 'Fintek', art: 'soon', tag: 'fotka w drodze' },
-    { nick: 'VenQ', art: 'soon', tag: 'fotka w drodze' },
-    { nick: 'Hazeg', art: 'soon', tag: 'fotka w drodze' },
-    { nick: 'Cebulka', art: 'onion', tag: 'płaczesz, jak go kroisz' },
+    { nick: 'VenQ', photo: 'img/venq.jpg', tag: 'pokaż stópki' },
+    { nick: 'Hazeg', photo: 'img/hazeg.jpg', tag: 'śpi na raidzie' },
+    { nick: 'Cebulka', photo: 'img/cebulka.jpg', tag: 'ma warstwy jak ogr' },
     { nick: 'Eerion', art: 'void', tag: 'pustka' },
     { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' }
   ],
-
-  // Zdjęcia czekające na przypisanie (do wpisania w PLAYERS jako photo):
-  // img/gracz-a.jpg — łysy w okularach, img/gracz-b.jpg — w słuchawkach,
-  // img/gracz-c.jpg — śpiący na kanapie, img/gracz-d.jpg — śmiejący się.
 
   // Własne dźwięki zamiast syntezatora.
   // Nazwy: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win, druid.
