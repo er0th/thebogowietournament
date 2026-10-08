@@ -186,6 +186,18 @@
       <path d="M25.5 17 C26 11 38 11 38.5 17" fill="#6b4226" stroke="${K}" stroke-width="1.4"/>
       <circle cx="29.5" cy="20" r="1" fill="${K}"/><circle cx="34.5" cy="20" r="1" fill="${K}"/>
       <path d="M30 23.5 H34" stroke="${K}" stroke-width="1.4"/>`,
+    clover: `
+      <rect width="64" height="64" fill="#e8f7df"/>
+      <path d="M32 34 C34 44 38 52 46 60" fill="none" stroke="#2f7a2a" stroke-width="3.4"/>
+      <g fill="#3fae3a" stroke="${K}" stroke-width="2.2">
+        <path d="M32 32 C24 30 14 24 16 15 C18 8 27 8 29 14 C31 8 40 9 40 16 C40 22 36 28 32 32 Z" transform="rotate(-45 32 32)"/>
+        <path d="M32 32 C24 30 14 24 16 15 C18 8 27 8 29 14 C31 8 40 9 40 16 C40 22 36 28 32 32 Z" transform="rotate(45 32 32)"/>
+        <path d="M32 32 C24 30 14 24 16 15 C18 8 27 8 29 14 C31 8 40 9 40 16 C40 22 36 28 32 32 Z" transform="rotate(135 32 32)"/>
+        <path d="M32 32 C24 30 14 24 16 15 C18 8 27 8 29 14 C31 8 40 9 40 16 C40 22 36 28 32 32 Z" transform="rotate(225 32 32)"/>
+      </g>
+      <circle cx="32" cy="32" r="3" fill="#2f7a2a"/>
+      <path d="M52 10 L54 5 L56 10 L61 12 L56 14 L54 19 L52 14 L47 12 Z" fill="#f2c230" stroke="${K}" stroke-width="1.2"/>
+      <path d="M9 50 L10.5 46 L12 50 L16 51.5 L12 53 L10.5 57 L9 53 L5 51.5 Z" fill="#f2c230" stroke="${K}" stroke-width="1.2"/>`,
     soon: `
       <rect width="64" height="64" fill="#2a2420"/>
       <rect x="14" y="22" width="36" height="24" rx="4" fill="none" stroke="#f2c230" stroke-width="2.6"/>

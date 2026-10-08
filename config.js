@@ -13,17 +13,18 @@ window.BOGOWIE_CONFIG = {
   FINAL_TARGET: 4,
 
   // Skład gildii, w tej kolejności na ekranie wyboru profilu.
-  // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga), tag = podpis, aliases = inne nicki.
+  // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga, clover), tag = podpis, aliases = inne nicki.
   PLAYERS: [
-    { nick: 'Bartas', photo: 'img/bartas.jpg', tag: 'Bartek i Druid' },
+    { nick: 'Bartas', aliases: ['Hefek'], photo: 'img/bartas.jpg', tag: 'aka Hefek' },
     { nick: 'Zdzichuj', aliases: ['Adam'], photo: 'img/zdzichuj.jpg', tag: 'aka Adam' },
     { nick: 'Eroth', photo: 'img/eroth.jpg', tag: 'ten od strony' },
-    { nick: 'Fintek', art: 'soon', tag: 'fotka w drodze' },
+    { nick: 'Fintek', photo: 'img/fintek.jpg', tag: 'The BÓG' },
     { nick: 'VenQ', photo: 'img/venq.jpg', tag: 'pokaż stópki' },
     { nick: 'Hazeg', photo: 'img/hazeg.jpg', tag: 'śpi na raidzie' },
     { nick: 'Cebulka', photo: 'img/cebulka.jpg', tag: 'ma warstwy jak ogr' },
     { nick: 'Eerion', art: 'void', tag: 'pustka' },
-    { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' }
+    { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' },
+    { nick: 'Torrac', art: 'clover', tag: 'farciarz jebany' }
   ],
 
   // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
