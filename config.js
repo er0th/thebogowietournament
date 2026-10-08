@@ -47,6 +47,7 @@ window.BOGOWIE_CONFIG = {
     'player:Hazeg': 'sfx/hazeg.mp3',
     'player:Eroth': 'sfx/eroth.mp3',
     'player:Eerion': 'sfx/eerion.mp3',
+    'player:Torrac': 'sfx/torrac.mp3',
 
     'race:dwarf': 'sfx/dwarf1.mp3',
 
