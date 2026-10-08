@@ -15,7 +15,7 @@ window.BOGOWIE_CONFIG = {
   // Wasze zdjęcia do nagłówka, np. ['img/ekipa1.jpg', 'img/ekipa2.jpg', 'img/ekipa3.jpg']
   PHOTOS: [],
 
-  // Własne dźwięki zamiast syntezatora. Nazwy: tick, flip, drum, stamp, sad, crown, win.
+  // Własne dźwięki zamiast syntezatora. Nazwy: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win.
   // Przykład: { win: 'sfx/win.mp3', sad: 'sfx/trombone.mp3' }
   SFX: {}
 };

@@ -51,6 +51,23 @@
       [392, 370, 349].forEach((f, i) => tone(f, i * 0.28, 0.26, 'sawtooth', 0.06));
       tone(330, 0.84, 0.7, 'sawtooth', 0.06, 300);
     },
+    howl: () => {
+      const c = ac(); if (!c) return;
+      const o = c.createOscillator(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+      o.type = 'sawtooth'; lfo.frequency.value = 7; lg.gain.value = 18;
+      lfo.connect(lg).connect(o.frequency);
+      const t = c.currentTime;
+      o.frequency.setValueAtTime(300, t);
+      o.frequency.exponentialRampToValueAtTime(820, t + 0.45);
+      o.frequency.exponentialRampToValueAtTime(260, t + 1.4);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07, t + 0.1);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5);
+      o.connect(g).connect(c.destination);
+      o.start(t); lfo.start(t); o.stop(t + 1.55); lfo.stop(t + 1.55);
+    },
+    heartbeat: () => { tone(70, 0, 0.14, 'sine', 0.5, 45); tone(65, 0.2, 0.16, 'sine', 0.4, 40); },
+    boom: () => { tone(110, 0, 0.9, 'sine', 0.5, 30); noise(0, 0.6, 0.35, 300); },
     crown: () => [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.07, 0.18, 'triangle', 0.12)),
     win: () => {
       [[523, 0, 0.12], [523, 0.13, 0.12], [523, 0.26, 0.12], [698, 0.4, 0.5], [880, 0.55, 0.6], [1046, 0.75, 0.9]]

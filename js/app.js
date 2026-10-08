@@ -13,11 +13,10 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pickOne = arr => arr[B.randInt(arr.length)];
 
-  const STAMPS = ['ODPADA', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'SKIP', 'BYE'];
+  const STAMPS = ['ODPADA', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'BYE'];
   const SLOT = ['A', 'B', 'C'];
 
   const state = { user: null, admin: false, entries: [], speed: 1, selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null };
-  try { state.speed = localStorage.getItem('bogowie:fast') === '1' ? 0.15 : 1; } catch (e) { /* ignore */ }
   const T = ms => Math.round(ms * state.speed);
 
   /* ---------- drobne klocki ---------- */
@@ -96,17 +95,28 @@
       <div class="reveal">
         <div class="rv-main">
           <div class="rv-head"><span class="rv-stage"></span><h3 class="rv-title"></h3></div>
-          <div class="rv-area" aria-live="polite"></div>
+          <p class="rv-hype" aria-live="polite"></p>
+          <div class="rv-area"></div>
           <div class="rv-controls">
             <button type="button" class="btn btn-big rv-next"></button>
-            <button type="button" class="btn btn-ghost rv-auto" hidden>Auto do końca</button>
-            <button type="button" class="btn btn-ghost rv-skip">Pokaż wynik od razu</button>
           </div>
         </div>
         <aside class="rv-side" aria-label="Podsumowanie"></aside>
+        <div class="flash" aria-hidden="true"></div>
       </div>`;
     const area = $('.rv-area', container), side = $('.rv-side', container);
-    const nextBtn = $('.rv-next', container), autoBtn = $('.rv-auto', container), skipBtn = $('.rv-skip', container);
+    const nextBtn = $('.rv-next', container), hype = $('.rv-hype', container);
+    const box = $('.reveal', container);
+
+    const LINES = {
+      show: ['Los tasuje karty…', 'Ktoś tu zaraz zapłacze.', 'Módl się do RNG.', 'Nie patrz. Albo patrz.', 'Czujesz to? To strach.'],
+      cut: ['Kto poleci pierwszy?', 'Zaraz będzie skowyt.', 'Pakujcie się, frajerzy.', 'Ktoś dziś wraca do domu z płaczem.'],
+      crown: ['BĘBNY…', 'Wstrzymaj oddech.', 'To jest TEN moment.', 'Jeszcze… jeszcze…', 'Nogi się trzęsą.'],
+      final: ['Kręcimy!', 'Ojojoj…', 'Kto to zgarnie?', 'Serce w gardle.', 'Nie mrugaj.']
+    };
+    const say = (txt, hot) => { hype.textContent = txt; hype.classList.toggle('hot', !!hot); hype.classList.remove('pop'); void hype.offsetWidth; hype.classList.add('pop'); };
+    const quake = (strong) => { box.classList.remove('quake', 'quake-big'); void box.offsetWidth; box.classList.add(strong ? 'quake-big' : 'quake'); };
+    const flash = () => { const f = $('.flash', box); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); };
 
     function roundDone(ri) { return pos >= ri * 3 + 3; }
     function finalCounts(upto) {
@@ -138,8 +148,7 @@
         const out = !d.advancing.includes(v);
         if ((phase === 'cut' || phase === 'crown') && out) cls += ' out';
         if (phase === 'crown') cls += v === d.winner ? ' crowned' : (out ? '' : ' dim');
-        const html = round.kind === 'race' ? raceCard(v, cls) : classCard(v, d.race, cls);
-        return html;
+        return round.kind === 'race' ? raceCard(v, cls) : classCard(v, d.race, cls);
       }).join('');
     }
 
@@ -164,7 +173,9 @@
       $('.rv-title', container).textContent = `Kto pierwszy trafi ${target} razy, ten wygrywa`;
       const cards = result.stage2.map((r, i) => {
         const pips = Array.from({ length: target }, (_, p) => `<i class="${p < c[i] ? 'on' : ''}"></i>`).join('');
-        return `<div class="fcard ${highlight === i ? 'hot' : ''}" data-slot="${i}" style="--cc:${B.CLASS_COLORS[r.winner]}">
+        const mp = c[i] === target - 1;
+        return `<div class="fcard ${highlight === i ? 'hot' : ''} ${mp ? 'matchpoint' : ''}" data-slot="${i}" style="--cc:${B.CLASS_COLORS[r.winner]}">
+          ${mp ? '<span class="mp-tag">MECZBOL</span>' : ''}
           <div class="fcard-tag">Combo ${i + 1}</div>
           <div class="fcard-icos">${I.race(r.race)}${I.cls(r.winner)}</div>
           <div class="fcard-name">${esc(B.comboLabel(r.race, r.winner))}</div>
@@ -179,6 +190,7 @@
       const c = finalCounts(result.final.sequence.length);
       $('.rv-stage', container).textContent = 'MAMY ZWYCIĘZCĘ';
       $('.rv-title', container).textContent = 'Los przemówił. Reklamacji nie przyjmujemy.';
+      hype.textContent = '';
       area.innerHTML = `
         <div class="winner">
           <span class="gg">GG EZ</span>
@@ -206,13 +218,14 @@
     function updateButtons() {
       const done = pos >= beats.length;
       nextBtn.hidden = done;
-      skipBtn.hidden = done;
-      autoBtn.hidden = done || pos < finalStart;
+      nextBtn.disabled = busy;
       if (done) return;
       const b = beats[pos];
       let label;
-      if (b.final) label = pos === finalStart ? 'DO FINAŁU! Losuj 1. rundę' : `Losuj rundę ${b.k + 1}`;
-      else {
+      if (b.final) {
+        const c = finalCounts(b.k);
+        label = pos === finalStart ? 'DO FINAŁU! Losuj 1. rundę' : (c.some(n => n === target - 1) ? `MECZBOL! Losuj rundę ${b.k + 1}` : `Losuj rundę ${b.k + 1}`);
+      } else {
         const r = rounds[b.ri];
         const nOut = r.data.contenders.length - 3;
         if (b.phase === 'show') label = b.ri === 0 ? 'LOSUJ KANDYDATÓW' : `DALEJ: ${r.stage === 1 ? 'Rasa ' + SLOT[r.i] : 'Combo ' + (r.i + 1)}`;
@@ -221,32 +234,43 @@
       }
       nextBtn.textContent = label;
       nextBtn.disabled = busy;
-      autoBtn.disabled = busy;
-      skipBtn.disabled = busy;
+      nextBtn.classList.toggle('btn-danger', !b.final && b.phase === 'cut');
     }
 
-    async function roulette(nodes, targetIdx, rounds_) {
-      const steps = (rounds_ || 2) * nodes.length + targetIdx + 1;
+    // Podświetlenie biegnie po kartach i zwalnia; `laps` pełnych okrążeń, potem cel.
+    async function roulette(nodes, targetIdx, laps, slow) {
+      const steps = laps * nodes.length + targetIdx + 1;
       for (let s = 0; s < steps; s++) {
         nodes.forEach(n => n.classList.remove('hot'));
         nodes[s % nodes.length].classList.add('hot');
         S.play('tick');
-        await sleep(T(60 + Math.pow(s / steps, 3) * 260));
+        await sleep(T(70 + Math.pow(s / steps, 3) * (slow || 420)));
       }
     }
 
     async function playBeat() {
       const b = beats[pos];
       if (b.final) {
-        if (pos === finalStart) { renderFinal(0); await sleep(T(250)); }
-        const nodes = $$('.fcard', area);
-        await roulette(nodes, b.k >= 0 ? result.final.sequence[b.k] : 0, 1);
+        if (pos === finalStart) { renderFinal(0); say('WIELKI FINAŁ. Zero litości.', true); S.play('boom'); quake(true); await sleep(T(1200)); }
+        const before = finalCounts(b.k);
+        const pick = result.final.sequence[b.k];
+        const matchPoint = before.some(n => n === target - 1);
+        const decisive = before[pick] === target - 1;
+        if (matchPoint) {
+          say('MECZBOL! Ktoś zaraz zawyje…', true);
+          for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
+        } else say(pickOne(LINES.final));
+        await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
         pos++;
-        renderFinal(pos - finalStart, result.final.sequence[b.k]);
-        S.play('flip');
+        renderFinal(pos - finalStart, pick);
+        S.play('stamp'); quake(decisive);
         if (pos >= beats.length) {
-          await sleep(T(700));
-          renderSide(); renderDone(); S.play('win'); confetti(container);
+          say('KONIEC. ZAMKNIJ OCZY.', true);
+          await sleep(T(1400));
+          flash(); S.play('boom');
+          renderSide(); renderDone(); S.play('win'); confetti(container); quake(true);
+        } else if (finalCounts(pos - finalStart)[pick] === target - 1) {
+          say(`Combo ${pick + 1} ma MECZBOLA!`, true);
         }
         return;
       }
@@ -254,9 +278,10 @@
       if (b.phase === 'show') {
         renderSide();
         renderRound(b.ri, 'none');
+        say(pickOne(LINES.show));
         S.play('drum');
         $$('.card', area).forEach(c => c.classList.add('shake'));
-        await sleep(T(750));
+        await sleep(T(1300));
         const html = round.data.contenders.map(v => round.kind === 'race' ? raceCard(v) : classCard(v, round.data.race));
         const nodes = $$('.card', area);
         for (let k = 0; k < nodes.length; k++) {
@@ -266,26 +291,55 @@
           fresh.classList.add('flip-in');
           nodes[k].replaceWith(fresh);
           S.play('flip');
-          await sleep(T(140));
+          await sleep(T(260));
         }
+        say('No to mamy kandydatów. Ktoś zaraz odpadnie.');
       } else if (b.phase === 'cut') {
         const losers = $$('.card', area).filter(c => !round.data.advancing.includes(c.dataset.v));
-        for (const c of losers) {
+        for (let li = 0; li < losers.length; li++) {
+          say(pickOne(LINES.cut));
+          const alive = $$('.card', area).filter(c => !c.classList.contains('out'));
+          await roulette(alive, alive.indexOf(losers[li]), 1, 300);
+          await sleep(T(450));
+          const c = losers[li];
+          c.classList.remove('hot');
           c.classList.add('out');
           c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>`);
-          S.play('stamp');
-          await sleep(T(420));
+          S.play('stamp'); quake();
+          await sleep(T(250));
+          S.play(li % 2 ? 'sad' : 'howl');
+          say(`${c.querySelector('.card-name').textContent}… ${pickOne(['SKOWYT.', 'PŁACZ.', 'AUUUU.', 'Nara, frajerze.', 'Do piachu.'])}`, true);
+          await sleep(T(1100));
         }
-        S.play('sad');
       } else {
         const alive = $$('.card', area).filter(c => !c.classList.contains('out'));
         const idx = alive.findIndex(c => c.dataset.v === round.data.winner);
-        await roulette(alive, idx, 2);
+        say(pickOne(LINES.crown), true);
+        S.play('drum');
+        await sleep(T(900));
+        const fake = B.randInt(2) === 0;
+        if (fake) {
+          const near = (idx + alive.length - 1) % alive.length;
+          await roulette(alive, near, 3, 650);
+          say('TO TEN?!', true);
+          await sleep(T(1100));
+          S.play('tick');
+          alive.forEach(n => n.classList.remove('hot'));
+          alive[idx].classList.add('hot');
+          say('A JEDNAK NIE!', true);
+          quake();
+          await sleep(T(500));
+        } else {
+          await roulette(alive, idx, 3, 650);
+          await sleep(T(600));
+        }
         alive.forEach(c => { c.classList.remove('hot'); if (c.dataset.v !== round.data.winner) c.classList.add('dim'); });
         const w = alive[idx];
         w.classList.add('crowned');
         w.insertAdjacentHTML('beforeend', '<span class="crown-tag">WYBRANIEC</span>');
+        flash();
         S.play('crown');
+        say(`${w.querySelector('.card-name').textContent}! Ktoś się cieszy, ktoś płacze.`, true);
       }
       pos++;
       renderSide();
@@ -298,17 +352,6 @@
     }
 
     nextBtn.addEventListener('click', step);
-    autoBtn.addEventListener('click', async () => {
-      const prev = state.speed; state.speed = Math.min(prev, 0.35);
-      while (pos < beats.length) { await step(); }
-      state.speed = prev;
-    });
-    skipBtn.addEventListener('click', () => {
-      if (busy) return;
-      pos = beats.length; save();
-      renderAt(); S.play('win'); confetti(container);
-      if (opts.onDone) opts.onDone();
-    });
 
     renderAt();
     return { finished: () => pos >= beats.length };
@@ -330,14 +373,6 @@
     const paintM = () => { m.textContent = S.isMuted() ? 'Dźwięk: OFF' : 'Dźwięk: ON'; m.setAttribute('aria-pressed', String(!S.isMuted())); };
     m.addEventListener('click', () => { S.toggle(); paintM(); S.play('tick'); });
     paintM();
-    const f = $('#fastBtn');
-    const paintF = () => { f.textContent = state.speed < 1 ? 'Tempo: niecierpliwe' : 'Tempo: dramatyczne'; f.setAttribute('aria-pressed', String(state.speed < 1)); };
-    f.addEventListener('click', () => {
-      state.speed = state.speed < 1 ? 1 : 0.15;
-      try { localStorage.setItem('bogowie:fast', state.speed < 1 ? '1' : '0'); } catch (e) { /* ignore */ }
-      paintF();
-    });
-    paintF();
   }
 
   /* ---------- wybór frakcji ---------- */

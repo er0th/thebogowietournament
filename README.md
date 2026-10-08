@@ -45,7 +45,7 @@ Admin widzi w kalendarzu przycisk usuwania wpisów.
 
 ## Zdjęcia i dźwięki
 - Zdjęcia wrzuć do folderu `img/` i wpisz w `config.js` → `PHOTOS`.
-- Dźwięki wrzuć do `sfx/` i wpisz w `config.js` → `SFX` (nazwy: `tick`, `flip`, `drum`, `stamp`, `sad`, `crown`, `win`). Bez plików gra syntezator.
+- Dźwięki wrzuć do `sfx/` i wpisz w `config.js` → `SFX` (nazwy: `tick`, `flip`, `drum`, `stamp`, `sad`, `howl`, `heartbeat`, `boom`, `crown`, `win`). Bez plików gra syntezator.
 
 ## Zmiana dat lub liczby trafień w finale
 Zmień w **obu** miejscach: `config.js` (`EVENT_START`, `EVENT_END`, `FINAL_TARGET`) i w `supabase/schema.sql` (`event_start`, `event_end`, `final_target`), potem uruchom SQL ponownie.
