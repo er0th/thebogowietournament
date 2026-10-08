@@ -13,11 +13,36 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pickOne = arr => arr[B.randInt(arr.length)];
 
-  const STAMPS = ['ODPADA', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'BYE'];
+  const STAMPS = ['WYPIERDALAJ', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'SPADAJ'];
   const SLOT = ['A', 'B', 'C'];
+  const RAGE_FU = '<img class="rage" src="img/rage-fu.png" alt="">';
+  const RAGE_SWEET = '<img class="rage sweet" src="img/rage-sweet.png" alt="">';
 
-  const state = { user: null, admin: false, entries: [], speed: 1, selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null };
-  const T = ms => Math.round(ms * state.speed);
+  const state = { entries: [], selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null, nick: null };
+  try { state.nick = localStorage.getItem('bogowie:nick') || null; } catch (e) { /* ignore */ }
+  const T = ms => ms;
+
+  /* ---------- gracze ---------- */
+
+  const PLAYERS = (cfg.PLAYERS || []).map(p => Object.assign({ aliases: [] }, p));
+  function playerOf(nick) {
+    const k = B.nickKey(nick);
+    return PLAYERS.find(p => B.nickKey(p.nick) === k || p.aliases.some(a => B.nickKey(a) === k)) || null;
+  }
+  function knownNicks() {
+    const seen = new Map();
+    PLAYERS.forEach(p => seen.set(B.nickKey(p.nick), p.nick));
+    state.entries.forEach(e => {
+      const p = playerOf(e.nick);
+      const k = B.nickKey(p ? p.nick : e.nick);
+      if (!seen.has(k)) seen.set(k, e.nick);
+    });
+    return Array.from(seen.values());
+  }
+  const sameNick = (a, b) => {
+    const pa = playerOf(a), pb = playerOf(b);
+    return B.nickKey(pa ? pa.nick : a) === B.nickKey(pb ? pb.nick : b);
+  };
 
   /* ---------- drobne klocki ---------- */
 
@@ -35,14 +60,14 @@
   function comboChip(raceId, cls) {
     return `<span class="combo-chip" style="--cc:${B.CLASS_COLORS[cls] || '#999'}"><span class="mini">${I.race(raceId)}</span><span class="mini">${I.cls(cls)}</span><span>${esc(B.comboLabel(raceId, cls))}</span></span>`;
   }
-  function avatar(name, url, size) {
+  function avatar(nick, size) {
     const s = size || 32;
-    if (url && /^https:\/\//.test(url)) {
-      return `<img class="avatar" src="${esc(url)}" alt="" width="${s}" height="${s}" style="width:${s}px;height:${s}px" loading="lazy" referrerpolicy="no-referrer">`;
+    const p = playerOf(nick);
+    if (p && p.photo) {
+      return `<img class="avatar" src="${esc(p.photo)}" alt="" width="${s}" height="${s}" style="width:${s}px;height:${s}px" loading="lazy">`;
     }
-    let h = 0; for (const ch of String(name || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-    const hue = h % 360;
-    return `<span class="avatar avatar-txt" style="width:${s}px;height:${s}px;font-size:${Math.round(s * 0.45)}px;background:hsl(${hue} 55% 42%)">${esc((name || '?').trim().charAt(0).toUpperCase())}</span>`;
+    let h = 0; for (const ch of String(nick || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return `<span class="avatar avatar-txt" style="width:${s}px;height:${s}px;font-size:${Math.round(s * 0.45)}px;background:hsl(${h % 360} 55% 42%)">${esc((nick || '?').trim().charAt(0).toUpperCase())}</span>`;
   }
   function fmtDate(d, opts) {
     return new Intl.DateTimeFormat('pl-PL', Object.assign({ timeZone: 'UTC', day: 'numeric', month: 'long' }, opts || {}))
@@ -73,6 +98,44 @@
     }
     root.appendChild(box);
     setTimeout(() => box.remove(), 4000);
+  }
+  // Wybuch: emoji rozlatują się z punktu (x, y w procentach kontenera).
+  function kaboom(root, x, y, n) {
+    const bits = ['💥', '🔥', '💩', '💀', '⚡', '🍺', '💥', '🔥'];
+    const box = document.createElement('div');
+    box.className = 'kaboom';
+    box.setAttribute('aria-hidden', 'true');
+    box.style.left = x + '%'; box.style.top = y + '%';
+    box.innerHTML = '<span class="ring"></span>';
+    for (let i = 0; i < (n || 16); i++) {
+      const b = document.createElement('i');
+      const ang = Math.random() * Math.PI * 2, dist = 60 + Math.random() * 180;
+      b.textContent = bits[i % bits.length];
+      b.style.setProperty('--dx', Math.cos(ang) * dist + 'px');
+      b.style.setProperty('--dy', Math.sin(ang) * dist + 'px');
+      b.style.fontSize = (18 + Math.random() * 26) + 'px';
+      b.style.animationDelay = (Math.random() * 0.08) + 's';
+      box.appendChild(b);
+    }
+    root.appendChild(box);
+    setTimeout(() => box.remove(), 1400);
+  }
+  function poopRain(root) {
+    const box = document.createElement('div');
+    box.className = 'rain';
+    box.setAttribute('aria-hidden', 'true');
+    const bits = ['💩', '💥', '🔥', '🍺', '👑', '💀'];
+    for (let i = 0; i < 60; i++) {
+      const b = document.createElement('i');
+      b.textContent = bits[i % bits.length];
+      b.style.left = Math.random() * 100 + '%';
+      b.style.fontSize = (20 + Math.random() * 30) + 'px';
+      b.style.animationDelay = (Math.random() * 1.6) + 's';
+      b.style.animationDuration = (1.8 + Math.random() * 1.8) + 's';
+      box.appendChild(b);
+    }
+    root.appendChild(box);
+    setTimeout(() => box.remove(), 5500);
   }
 
   /* ---------- odsłanianie turnieju ---------- */
@@ -109,14 +172,30 @@
     const box = $('.reveal', container);
 
     const LINES = {
-      show: ['Los tasuje karty…', 'Ktoś tu zaraz zapłacze.', 'Módl się do RNG.', 'Nie patrz. Albo patrz.', 'Czujesz to? To strach.'],
-      cut: ['Kto poleci pierwszy?', 'Zaraz będzie skowyt.', 'Pakujcie się, frajerzy.', 'Ktoś dziś wraca do domu z płaczem.'],
-      crown: ['BĘBNY…', 'Wstrzymaj oddech.', 'To jest TEN moment.', 'Jeszcze… jeszcze…', 'Nogi się trzęsą.'],
-      final: ['Kręcimy!', 'Ojojoj…', 'Kto to zgarnie?', 'Serce w gardle.', 'Nie mrugaj.']
+      show: ['Los tasuje karty i ma na ciebie wyjebane.', 'Ktoś tu zaraz zapłacze jak dziecko.', 'Pomódl się do RNG, i tak nie pomoże.', 'Nie patrz. Albo patrz, chuj z tym.', 'Czujesz ten zapach? To strach. Albo Tauren.'],
+      cut: ['Kto pierwszy wypierdala?', 'Zaraz będzie skowyt.', 'Pakujcie manatki, frajerzy.', 'Ktoś dziś wraca do domu z płaczem.', 'Kurwa, kogo tu wyjebać…'],
+      crown: ['BĘBNY…', 'Zaciśnij pośladki.', 'To jest TEN moment, kurwa.', 'Jeszcze… jeszcze…', 'Nogi się trzęsą jak po pięciu monsterach.'],
+      final: ['Kręcimy, kurwa!', 'Ojojoj…', 'Kto to zgarnie?', 'Serce w gardle, dupa w trokach.', 'Nie mrugaj, bo przegapisz.']
     };
+    const SHOUTS = ['BUM!', 'JEB!', 'ZUG ZUG!', 'PIERDUT!', 'KABOOM!', 'ŁUP!', 'SRU!', 'O KURWA!'];
+    const DEATHS = ['SKOWYT.', 'PŁACZ I ZGRZYTANIE ZĘBAMI.', 'SPIERDALAJ.', 'DO PIACHU.', 'NARA, FRAJERZE.', 'AUUUU.', 'SPADAJ NA DRZEWO.'];
     const say = (txt, hot) => { hype.textContent = txt; hype.classList.toggle('hot', !!hot); hype.classList.remove('pop'); void hype.offsetWidth; hype.classList.add('pop'); };
     const quake = (strong) => { box.classList.remove('quake', 'quake-big'); void box.offsetWidth; box.classList.add(strong ? 'quake-big' : 'quake'); };
     const flash = () => { const f = $('.flash', box); f.classList.remove('on'); void f.offsetWidth; f.classList.add('on'); };
+    const kabooomAt = (el, n) => {
+      if (!el) return;
+      const bb = box.getBoundingClientRect(), eb = el.getBoundingClientRect();
+      kaboom(box, ((eb.left + eb.width / 2 - bb.left) / bb.width) * 100, ((eb.top + eb.height / 2 - bb.top) / bb.height) * 100, n);
+    };
+    const shout = txt => {
+      const s = document.createElement('div');
+      s.className = 'shout';
+      s.setAttribute('aria-hidden', 'true');
+      s.textContent = txt;
+      s.style.setProperty('--rot', (B.randInt(24) - 12) + 'deg');
+      box.appendChild(s);
+      setTimeout(() => s.remove(), 1300);
+    };
 
     function roundDone(ri) { return pos >= ri * 3 + 3; }
     function finalCounts(upto) {
@@ -154,8 +233,8 @@
 
     function addStamps() {
       $$('.card', area).forEach(c => {
-        if (c.classList.contains('out') && !$('.stamp', c)) c.insertAdjacentHTML('beforeend', `<span class="stamp">${pickOne(STAMPS)}</span>`);
-        if (c.classList.contains('crowned') && !$('.crown-tag', c)) c.insertAdjacentHTML('beforeend', '<span class="crown-tag">WYBRANIEC</span>');
+        if (c.classList.contains('out') && !$('.stamp', c)) c.insertAdjacentHTML('beforeend', `<span class="stamp">${pickOne(STAMPS)}</span>${RAGE_FU}`);
+        if (c.classList.contains('crowned') && !$('.crown-tag', c)) c.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
       });
     }
 
@@ -193,7 +272,8 @@
       hype.textContent = '';
       area.innerHTML = `
         <div class="winner">
-          <span class="gg">GG EZ</span>
+          <img class="mind-blown" src="img/mind-blown.png" alt="Mind blown">
+          <span class="gg">ZUG ZUG</span>
           <div class="winner-icos">${I.faction(result.faction)}${I.race(w.race)}${I.cls(w.cls)}</div>
           <div class="winner-name" style="--cc:${B.CLASS_COLORS[w.cls]}">${esc(B.comboLabel(w.race, w.cls))}</div>
           <p class="winner-meme">${esc(B.RACE_MEMES[w.race] || '')}<br>${esc(B.CLASS_MEMES[w.cls] || '')}</p>
@@ -251,26 +331,46 @@
     async function playBeat() {
       const b = beats[pos];
       if (b.final) {
-        if (pos === finalStart) { renderFinal(0); say('WIELKI FINAŁ. Zero litości.', true); S.play('boom'); quake(true); await sleep(T(1200)); }
+        if (pos === finalStart) {
+          renderFinal(0);
+          say('WIELKI FINAŁ. ZERO LITOŚCI, ZERO HAMULCÓW.', true);
+          S.play('boom'); quake(true); flash();
+          kaboom(box, 50, 40, 26);
+          await sleep(T(1400));
+        }
         const before = finalCounts(b.k);
         const pick = result.final.sequence[b.k];
         const matchPoint = before.some(n => n === target - 1);
         const decisive = before[pick] === target - 1;
+        box.classList.toggle('redalert', matchPoint);
         if (matchPoint) {
-          say('MECZBOL! Ktoś zaraz zawyje…', true);
+          say('MECZBOL! Ktoś zaraz zesra się ze stresu…', true);
           for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
         } else say(pickOne(LINES.final));
         await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
         pos++;
         renderFinal(pos - finalStart, pick);
-        S.play('stamp'); quake(decisive);
+        const hit = $(`.fcard[data-slot="${pick}"]`, area);
+        S.play('boom'); quake(decisive);
+        kabooomAt(hit, decisive ? 30 : 14);
+        shout(pickOne(SHOUTS));
         if (pos >= beats.length) {
-          say('KONIEC. ZAMKNIJ OCZY.', true);
-          await sleep(T(1400));
-          flash(); S.play('boom');
-          renderSide(); renderDone(); S.play('win'); confetti(container); quake(true);
+          box.classList.remove('redalert');
+          say('KONIEC. ZACIŚNIJ POŚLADKI.', true);
+          await sleep(T(1100));
+          for (let k = 0; k < 3; k++) {
+            S.play('boom'); flash(); quake(true);
+            kaboom(box, 15 + B.randInt(70), 20 + B.randInt(60), 30);
+            shout(['BUM!', 'BUM BUM!', 'ZUG ZUG!'][k]);
+            await sleep(T(650));
+          }
+          renderSide(); renderDone();
+          S.play('win');
+          const w = B.winnerOf(result);
+          if (w.cls === 'Druid') S.play('druid');
+          confetti(container); poopRain(box); quake(true);
         } else if (finalCounts(pos - finalStart)[pick] === target - 1) {
-          say(`Combo ${pick + 1} ma MECZBOLA!`, true);
+          say(`Combo ${pick + 1} ma MECZBOLA! Ktoś tu się zaraz posra.`, true);
         }
         return;
       }
@@ -304,11 +404,11 @@
           const c = losers[li];
           c.classList.remove('hot');
           c.classList.add('out');
-          c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>`);
+          c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>${RAGE_FU}`);
           S.play('stamp'); quake();
           await sleep(T(250));
           S.play(li % 2 ? 'sad' : 'howl');
-          say(`${c.querySelector('.card-name').textContent}… ${pickOne(['SKOWYT.', 'PŁACZ.', 'AUUUU.', 'Nara, frajerze.', 'Do piachu.'])}`, true);
+          say(`${c.querySelector('.card-name').textContent}… ${pickOne(DEATHS)}`, true);
           await sleep(T(1100));
         }
       } else {
@@ -326,7 +426,7 @@
           S.play('tick');
           alive.forEach(n => n.classList.remove('hot'));
           alive[idx].classList.add('hot');
-          say('A JEDNAK NIE!', true);
+          say('A JEDNAK CHUJA! NIE TEN!', true);
           quake();
           await sleep(T(500));
         } else {
@@ -336,10 +436,11 @@
         alive.forEach(c => { c.classList.remove('hot'); if (c.dataset.v !== round.data.winner) c.classList.add('dim'); });
         const w = alive[idx];
         w.classList.add('crowned');
-        w.insertAdjacentHTML('beforeend', '<span class="crown-tag">WYBRANIEC</span>');
+        w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
         S.play('crown');
-        say(`${w.querySelector('.card-name').textContent}! Ktoś się cieszy, ktoś płacze.`, true);
+        if (round.kind === 'class' && round.data.winner === 'Druid') S.play('druid');
+        say(`${w.querySelector('.card-name').textContent}! Jedni się cieszą, reszta płacze w poduszkę.`, true);
       }
       pos++;
       renderSide();
@@ -357,22 +458,22 @@
     return { finished: () => pos >= beats.length };
   }
 
-  /* ---------- nagłówek: zdjęcia, dźwięk, tempo ---------- */
+  /* ---------- nagłówek ---------- */
 
   function renderPhotos() {
     const box = $('#photos');
-    const photos = (cfg.PHOTOS || []).slice(0, 4);
-    const caps = ['tu będzie czyjaś morda', 'tu też', 'i tu, jak się nie wstydzi'];
+    const photos = (cfg.PHOTOS || []).slice(0, 5);
+    const rot = [-7, 4, -3, 6, -5];
     box.innerHTML = photos.length
-      ? photos.map((p, i) => `<figure class="polaroid" style="--r:${[-6, 4, -2, 7][i]}deg"><img src="${esc(p)}" alt="Bogowie, zdjęcie ${i + 1}" loading="lazy"></figure>`).join('')
-      : caps.map((c, i) => `<figure class="polaroid empty" style="--r:${[-6, 4, -3][i]}deg"><div class="ph">JPG<br>SOON™</div><figcaption>${c}</figcaption></figure>`).join('');
+      ? photos.map((p, i) => `<figure class="polaroid" style="--r:${rot[i]}deg"><img src="${esc(p.src)}" alt="${esc(p.caption || 'Ktoś z Bogów')}" loading="lazy"><figcaption>${esc(p.caption || '')}</figcaption></figure>`).join('')
+      : '';
   }
 
   function setupToggles() {
     const m = $('#muteBtn');
-    const paintM = () => { m.textContent = S.isMuted() ? 'Dźwięk: OFF' : 'Dźwięk: ON'; m.setAttribute('aria-pressed', String(!S.isMuted())); };
-    m.addEventListener('click', () => { S.toggle(); paintM(); S.play('tick'); });
-    paintM();
+    const paint = () => { m.textContent = S.isMuted() ? 'Dźwięk: OFF (cykor)' : 'Dźwięk: NA PEŁNĄ'; m.setAttribute('aria-pressed', String(!S.isMuted())); };
+    m.addEventListener('click', () => { S.toggle(); paint(); S.play('tick'); });
+    paint();
   }
 
   /* ---------- wybór frakcji ---------- */
@@ -383,6 +484,7 @@
         ${I.faction(f)}<span>${B.FACTION_PL[f]}</span></button>`).join('');
     $$('.faction-btn', root).forEach(b => b.addEventListener('click', () => {
       $$('.faction-btn', root).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
+      document.body.dataset.faction = b.dataset.f;
       S.play('tick');
       onPick(b.dataset.f);
     }));
@@ -398,22 +500,21 @@
       box.hidden = false;
       Reveal(box, result, {
         actions(el) {
-          el.innerHTML = '<button type="button" class="btn">Jeszcze raz!</button>';
+          el.innerHTML = '<button type="button" class="btn">Jeszcze raz, kurwa!</button>';
           $('button', el).addEventListener('click', () => $('#randGo').click());
         }
       });
       box.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     $('#quickGo').addEventListener('click', () => {
-      const races = B.racesOf(state.randFaction);
-      const combos = races.flatMap(r => r.classes.map(c => [r.id, c]));
+      const combos = B.racesOf(state.randFaction).flatMap(r => r.classes.map(c => [r.id, c]));
       const [race, cls] = combos[B.randInt(combos.length)];
-      const out = $('#quickOut');
-      out.innerHTML = `<div class="quick-card" style="--cc:${B.CLASS_COLORS[cls]}">
+      $('#quickOut').innerHTML = `<div class="quick-card" style="--cc:${B.CLASS_COLORS[cls]}">
         <div class="winner-icos">${I.race(race)}${I.cls(cls)}</div>
         <div><div class="winner-name">${esc(B.comboLabel(race, cls))}</div>
         <p class="winner-meme">${esc(B.RACE_MEMES[race])} ${esc(B.CLASS_MEMES[cls])}</p></div></div>`;
       S.play('crown');
+      if (cls === 'Druid') S.play('druid');
     });
   }
 
@@ -440,66 +541,87 @@
     }).join('');
   }
 
+  function setNick(nick) {
+    state.nick = nick;
+    try { nick ? localStorage.setItem('bogowie:nick', nick) : localStorage.removeItem('bogowie:nick'); } catch (e) { /* ignore */ }
+    renderTournament();
+  }
+
   function renderTournament() {
     const box = $('#tourBody');
     const today = B.todayWarsaw();
     const demo = api.mode === 'demo'
-      ? `<div class="banner demo"><b>TRYB DEMO.</b> Supabase nie jest jeszcze podpięty, więc wpisy zapisują się tylko w tej przeglądarce. Do testów — idealnie. Do turnieju — nie.</div>` : '';
-    if (!state.user) {
+      ? `<div class="banner demo"><b>TRYB DEMO.</b> Baza jeszcze niepodpięta, więc wpisy lądują tylko w tej przeglądarce. Do testów zajebiście, do turnieju chujowo.</div>` : '';
+
+    if (!state.nick) {
+      const chips = knownNicks().map(n => `<button type="button" class="nick-chip" data-nick="${esc(n)}">${avatar(n, 40)}<span>${esc(n)}</span></button>`).join('');
       box.innerHTML = `${demo}
-        <div class="panel center">
-          <h3>Najpierw pokaż się Discordowi</h3>
-          <p class="muted">Kalendarz i wyniki widzi każdy. Turniej zrobisz dopiero po zalogowaniu, żeby było wiadomo, kogo potem wyśmiewać.</p>
-          ${api.mode === 'demo' ? '<p><label class="small" for="demoName">Nick do testów (demo):</label><br><input id="demoName" class="input" value="Demo Gracz" maxlength="32"></p>' : ''}
-          <button type="button" class="btn btn-big btn-discord" id="loginBtn">Zaloguj przez Discord${api.mode === 'demo' ? ' (demo)' : ''}</button>
+        <div class="panel">
+          <h3>Kim ty w ogóle jesteś?</h3>
+          <p class="muted">Kliknij swoją mordę albo wpisz nick. Zapamiętamy go na tym urządzeniu, żebyś nie musiał się przedstawiać jak na pierwszej randce.</p>
+          ${chips ? `<div class="nick-chips">${chips}</div>` : ''}
+          <form class="nick-form" id="nickForm" novalidate>
+            <label for="nickInput" class="small">Nowy w ekipie? Wpisz nick:</label>
+            <div class="nick-row"><input id="nickInput" class="input" maxlength="24" autocomplete="nickname" placeholder="np. Zdzichuj">
+            <button type="submit" class="btn">To ja, kurwa</button></div>
+          </form>
         </div>`;
-      $('#loginBtn').addEventListener('click', () => api.login($('#demoName') ? $('#demoName').value : undefined).catch(e => toast(e.message, true)));
+      $$('.nick-chip', box).forEach(b => b.addEventListener('click', () => { S.play('tick'); setNick(b.dataset.nick); }));
+      $('#nickForm').addEventListener('submit', ev => {
+        ev.preventDefault();
+        try {
+          const n = B.cleanNick($('#nickInput').value);
+          const p = playerOf(n);
+          setNick(p ? p.nick : n);
+        } catch (e) { toast(e.message, true); }
+      });
       return;
     }
-    const mine = state.entries.filter(e => e.user_id === state.user.id);
+
+    const nick = state.nick;
+    const mine = state.entries.filter(e => sameNick(e.nick, nick));
     const taken = new Set(mine.map(e => e.t_date));
     const over = today > cfg.EVENT_END;
     const notYet = today < cfg.EVENT_START;
     const avail = eventDays().filter(d => d <= today && !taken.has(d));
     if (!avail.includes(state.selectedDate)) state.selectedDate = avail.includes(today) ? today : (avail[avail.length - 1] || null);
 
-    const userBar = `<div class="userbar">${avatar(state.user.name, state.user.avatar, 40)}<span>Siema, <b>${esc(state.user.name)}</b>${state.admin ? ' <span class="tag">ADMIN</span>' : ''}</span>
-      <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">Wyloguj</button></div>`;
+    const userBar = `<div class="userbar">${avatar(nick, 48)}<span>Grasz jako <b>${esc(nick)}</b>. Powodzenia, bo się przyda.</span>
+      <button type="button" class="btn btn-ghost btn-sm" id="changeNick">To nie ja</button></div>`;
 
     let form;
-    if (over) form = `<div class="panel center"><h3>Event zakończony</h3><p class="muted">Ostatni turniej można było zrobić ${fmtDate(cfg.EVENT_END, { year: 'numeric' })}. Teraz zostały tylko wyniki i wymówki.</p></div>`;
-    else if (notYet) form = `<div class="panel center"><h3>Jeszcze nie teraz</h3><p class="muted">Start ${fmtDate(cfg.EVENT_START, { year: 'numeric' })}.</p></div>`;
-    else if (!avail.length) form = `<div class="panel center"><h3>Wszystko odklepane</h3><p class="muted">Masz wpis na każdy dzień, który się dało. Wróć jutro.</p></div>`;
+    if (over) form = `<div class="panel center"><h3>Po ptokach</h3><p class="muted">Ostatni turniej był ${fmtDate(cfg.EVENT_END, { year: 'numeric' })}. Zostały wyniki i wymówki.</p></div>`;
+    else if (notYet) form = `<div class="panel center"><h3>Spokojnie, kowboju</h3><p class="muted">Start ${fmtDate(cfg.EVENT_START, { year: 'numeric' })}.</p></div>`;
+    else if (!avail.length) form = `<div class="panel center"><h3>Wszystko odklepane</h3><p class="muted">Masz wpis na każdy dzień, jaki się dało. Idź się wyśpij, wróć jutro.</p></div>`;
     else {
       const grid = monthGrid(eventDays(), d => {
         const future = d > today, has = taken.has(d);
-        const dis = future || has;
         const label = `${fmtDate(d)}${has ? ', masz już wpis' : future ? ', jeszcze nie' : ''}`;
-        return `<button type="button" class="day ${has ? 'has' : ''} ${d === state.selectedDate ? 'sel' : ''} ${d === today ? 'today' : ''}" data-d="${d}" ${dis ? 'disabled' : ''} aria-label="${esc(label)}" aria-pressed="${d === state.selectedDate}">${parseInt(d.slice(8), 10)}${has ? '<i class="tick">✓</i>' : ''}</button>`;
+        return `<button type="button" class="day ${has ? 'has' : ''} ${d === state.selectedDate ? 'sel' : ''} ${d === today ? 'today' : ''}" data-d="${d}" ${future || has ? 'disabled' : ''} aria-label="${esc(label)}" aria-pressed="${d === state.selectedDate}">${parseInt(d.slice(8), 10)}${has ? '<i class="tick">✓</i>' : ''}</button>`;
       });
       form = `
         <div class="panel">
-          <h3>1. Frakcja na dziś</h3>
+          <h3>1. Za kogo dziś napierdalasz?</h3>
           <div class="faction-row" id="tourFaction"></div>
           <h3>2. Za który dzień?</h3>
           <p class="muted small">Dziś albo zaległy dzień bez wpisu. W przyszłość się nie da, cwaniaku.</p>
           <div class="cal pick">${grid}</div>
           <div class="go-row">
             <p class="small">Wybrano: <b id="selDate">${state.selectedDate ? fmtDate(state.selectedDate, { weekday: 'long' }) : '—'}</b></p>
-            <button type="button" class="btn btn-big btn-danger" id="startBtn">ZACZYNAMY TURNIEJ</button>
+            <button type="button" class="btn btn-big btn-danger" id="startBtn">JEDZIEMY Z KURWAMI</button>
           </div>
         </div>`;
     }
 
     const history = mine.slice().sort((a, b) => b.t_date.localeCompare(a.t_date)).map(e => `
       <li><span class="date">${fmtDate(e.t_date)}</span>${comboChip(e.winner_race, e.winner_class)}
-      <button type="button" class="btn btn-ghost btn-sm" data-replay="${esc(e.id)}">Przebieg</button></li>`).join('');
+      <button type="button" class="btn btn-ghost btn-sm" data-replay="${esc(e.id)}">Obejrzyj jeszcze raz</button></li>`).join('');
 
     box.innerHTML = `${demo}${userBar}${form}
       <div id="tourReveal" class="reveal-box" hidden></div>
-      <div class="panel"><h3>Twoje turnieje</h3>${history ? `<ul class="history">${history}</ul>` : '<p class="muted">Pusto. Jak w twoim banku po AH.</p>'}</div>`;
+      <div class="panel"><h3>Twoje turnieje</h3>${history ? `<ul class="history">${history}</ul>` : '<p class="muted">Pusto. Jak w twoim banku po wizycie na AH.</p>'}</div>`;
 
-    $('#logoutBtn').addEventListener('click', () => api.logout());
+    $('#changeNick').addEventListener('click', () => setNick(null));
     if ($('#tourFaction')) factionPicker($('#tourFaction'), state.faction, f => { state.faction = f; });
     $$('.cal.pick .day').forEach(b => b.addEventListener('click', () => {
       state.selectedDate = b.dataset.d;
@@ -519,37 +641,30 @@
     box.hidden = false;
     Reveal(box, entry.result, {
       key: 'bogowie:reveal:' + entry.id,
-      actions(el) {
-        el.innerHTML = '<a class="btn" href="#kalendarz">Zobacz kalendarz</a>';
-      }
+      actions(el) { el.innerHTML = '<a class="btn" href="#kalendarz">Pokaż w kalendarzu</a>'; }
     });
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function openWarning() {
-    if (!state.selectedDate) { toast('Wybierz dzień.', true); return; }
-    const dlg = $('#warnDialog');
-    $('#warnWhat').innerHTML = `${I.faction(state.faction)}<span><b>${esc(B.FACTION_PL[state.faction])}</b> · ${esc(fmtDate(state.selectedDate, { weekday: 'long', year: 'numeric' }))}</span>`;
+    if (!state.selectedDate) { toast('Wybierz dzień, geniuszu.', true); return; }
+    $('#warnWhat').innerHTML = `${avatar(state.nick, 36)}${I.faction(state.faction)}<span><b>${esc(state.nick)}</b> · ${esc(B.FACTION_PL[state.faction])} · ${esc(fmtDate(state.selectedDate, { weekday: 'long' }))}</span>`;
     $('#warnCheck').checked = false;
     $('#warnGo').disabled = true;
     S.play('stamp');
-    dlg.showModal();
+    $('#warnDialog').showModal();
   }
 
   async function confirmStart() {
-    const dlg = $('#warnDialog');
     const go = $('#warnGo');
     go.disabled = true;
     go.textContent = 'Los się ładuje…';
     try {
-      const entry = await api.start(state.faction, state.selectedDate);
-      dlg.close();
+      const entry = await api.start(state.nick, state.faction, state.selectedDate);
+      $('#warnDialog').close();
       state.entries = await api.listEntries();
-      renderTournament();
-      renderCalendar();
-      renderPlayers();
-      const fresh = state.entries.find(e => e.id === entry.id) || entry;
-      showTourReveal(fresh);
+      renderAll();
+      showTourReveal(state.entries.find(e => e.id === entry.id) || entry);
     } catch (e) {
       toast(e.message, true);
     } finally {
@@ -567,14 +682,13 @@
     const combos = (r.stage2 || []).map((x, i) => `<span class="pill">${i + 1}: ${comboChip(x.race, x.winner)}</span>`).join('');
     const seq = r.final ? r.final.sequence.map(s => `<span class="logchip">${s + 1}</span>`).join('') : '';
     return `<article class="entry">
-      <header>${avatar(e.user_name, e.avatar_url, 36)}<b>${esc(e.user_name)}</b><span class="mini fac">${I.faction(e.faction)}</span><span class="muted small">${esc(B.FACTION_PL[e.faction] || e.faction)}</span></header>
+      <header>${avatar(e.nick, 40)}<b>${esc(e.nick)}</b><span class="mini fac">${I.faction(e.faction)}</span><span class="muted small">${esc(B.FACTION_PL[e.faction] || e.faction)}</span></header>
       <div class="entry-win">${comboChip(e.winner_race, e.winner_class)}<span class="muted small">finał ${fin}</span></div>
-      <details><summary>Przebieg</summary>
+      <details><summary>Jak do tego doszło</summary>
         <p class="small"><b>Rasy:</b> ${rasy}</p>
         <p class="small"><b>Combo:</b> ${combos}</p>
-        <p class="small"><b>Finał (kolejne trafienia):</b> ${seq}</p>
+        <p class="small"><b>Finał, kolejne trafienia:</b> ${seq}</p>
       </details>
-      ${state.admin ? `<button type="button" class="btn btn-ghost btn-sm btn-del" data-del="${esc(e.id)}">Usuń wpis (admin)</button>` : ''}
     </article>`;
   }
 
@@ -584,7 +698,7 @@
     state.entries.forEach(e => { (byDay[e.t_date] = byDay[e.t_date] || []).push(e); });
     const grid = monthGrid(eventDays(), d => {
       const list = byDay[d] || [];
-      const av = list.slice(0, 4).map(e => avatar(e.user_name, e.avatar_url, 20)).join('');
+      const av = list.slice(0, 4).map(e => avatar(e.nick, 22)).join('');
       const more = list.length > 4 ? `<span class="more">+${list.length - 4}</span>` : '';
       const label = `${fmtDate(d)}: ${list.length} ${list.length === 1 ? 'wpis' : 'wpisów'}`;
       return `<button type="button" class="day ${d === today ? 'today' : ''} ${d === state.calDay ? 'sel' : ''} ${d > today ? 'future' : ''} ${d === cfg.EVENT_END ? 'deadline' : ''}" data-d="${d}" aria-label="${esc(label)}">
@@ -595,39 +709,38 @@
     const det = $('#calDetail');
     if (!state.calDay) {
       const total = state.entries.length;
-      det.innerHTML = `<p class="muted">Kliknij dzień, żeby zobaczyć, kto co wylosował. Do tej pory: <b>${total}</b> ${total === 1 ? 'turniej' : 'turniejów'}.</p>`;
+      det.innerHTML = `<p class="muted">Kliknij dzień i zobacz, kogo los wyruchał. Do tej pory: <b>${total}</b> ${total === 1 ? 'turniej' : 'turniejów'}.</p>`;
       return;
     }
     const list = byDay[state.calDay] || [];
     det.innerHTML = `<h3>${esc(fmtDate(state.calDay, { weekday: 'long', year: 'numeric' }))}</h3>` +
-      (list.length ? `<div class="entries">${list.map(entryCard).join('')}</div>` : '<p class="muted">Nikt nic. Cisza jak na wipe’ie.</p>');
-    $$('[data-del]', det).forEach(b => b.addEventListener('click', async () => {
-      if (b.dataset.armed !== '1') { b.dataset.armed = '1'; b.textContent = 'Kliknij jeszcze raz, żeby usunąć'; return; }
-      try { await api.deleteEntry(b.dataset.del); state.entries = await api.listEntries(); renderAll(); toast('Wpis usunięty.'); }
-      catch (e) { toast(e.message, true); }
-    }));
+      (list.length ? `<div class="entries">${list.map(entryCard).join('')}</div>` : '<p class="muted">Nikt nic. Cisza jak po wipe’ie na trashu.</p>');
   }
 
   /* ---------- gracze i top 3 ---------- */
 
   function renderPlayers() {
     const users = {};
+    knownNicks().forEach(n => { users[B.nickKey(n)] = { name: n, n: 0, combos: {} }; });
     state.entries.forEach(e => {
-      const u = users[e.user_id] = users[e.user_id] || { name: e.user_name, avatar: e.avatar_url, n: 0, combos: {}, last: '' };
-      if (e.created_at >= u.last) { u.last = e.created_at; u.name = e.user_name; u.avatar = e.avatar_url; }
+      const p = playerOf(e.nick);
+      const k = B.nickKey(p ? p.nick : e.nick);
+      const u = users[k] = users[k] || { name: e.nick, n: 0, combos: {} };
       u.n++;
-      const k = e.winner_race + '|' + e.winner_class;
-      const c = u.combos[k] = u.combos[k] || { race: e.winner_race, cls: e.winner_class, n: 0, last: '' };
+      const ck = e.winner_race + '|' + e.winner_class;
+      const c = u.combos[ck] = u.combos[ck] || { race: e.winner_race, cls: e.winner_class, n: 0, last: '' };
       c.n++; if (e.t_date > c.last) c.last = e.t_date;
     });
     const list = Object.values(users).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
-    if (!list.length) { $('#playersBody').innerHTML = '<p class="muted">Nikt jeszcze nie zagrał. Bądź pierwszy, zgarnij chwałę.</p>'; return; }
+    if (!list.length) { $('#playersBody').innerHTML = '<p class="muted">Nikt jeszcze nie zagrał. Same cykory.</p>'; return; }
     const medals = ['gold', 'silver', 'bronze'];
     $('#playersBody').innerHTML = `<div class="players">${list.map(u => {
       const top = Object.values(u.combos).sort((a, b) => b.n - a.n || b.last.localeCompare(a.last)).slice(0, 3);
+      const p = playerOf(u.name);
+      const alias = p && p.aliases.length ? ` <span class="muted small">aka ${esc(p.aliases.join(', '))}</span>` : '';
       return `<article class="player">
-        <header>${avatar(u.name, u.avatar, 44)}<div><b>${esc(u.name)}</b><span class="muted small">${u.n} ${u.n === 1 ? 'turniej' : 'turniejów'}</span></div></header>
-        <ol class="top3">${top.map((c, i) => `<li><span class="medal ${medals[i]}">${i + 1}</span>${comboChip(c.race, c.cls)}<span class="cnt">×${c.n}</span></li>`).join('')}</ol>
+        <header>${avatar(u.name, 64)}<div><b>${esc(u.name)}</b>${alias}<span class="muted small">${u.n ? `${u.n} ${u.n === 1 ? 'turniej' : 'turniejów'}` : 'jeszcze nie grał, cykor'}</span></div></header>
+        ${top.length ? `<ol class="top3">${top.map((c, i) => `<li><span class="medal ${medals[i]}">${i + 1}</span>${comboChip(c.race, c.cls)}<span class="cnt">×${c.n}</span></li>`).join('')}</ol>` : '<p class="small muted">Zero wyników. Zero chwały.</p>'}
       </article>`;
     }).join('')}</div>`;
   }
@@ -645,6 +758,7 @@
   function renderAll() { renderTournament(); renderCalendar(); renderPlayers(); }
 
   async function boot() {
+    document.body.dataset.faction = state.randFaction;
     renderPhotos();
     setupToggles();
     setupRandomizer();
@@ -654,18 +768,10 @@
     $('#warnCheck').addEventListener('change', e => { $('#warnGo').disabled = !e.target.checked; });
     $('#warnCancel').addEventListener('click', () => $('#warnDialog').close());
     $('#warnGo').addEventListener('click', confirmStart);
-
-    api.onAuthChange(async u => {
-      state.user = u;
-      state.admin = u ? await api.isAdmin() : false;
-      renderAll();
-    });
     try {
-      state.user = await api.getUser();
-      state.admin = state.user ? await api.isAdmin() : false;
       state.entries = await api.listEntries();
     } catch (e) {
-      toast('Nie udało się pobrać wyników: ' + e.message, true);
+      toast('Nie da się pobrać wyników: ' + e.message, true);
     }
     renderAll();
   }

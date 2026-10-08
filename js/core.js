@@ -26,28 +26,28 @@
   const RACE_BY_ID = Object.fromEntries(RACES.map(r => [r.id, r]));
 
   const RACE_MEMES = {
-    orc: 'Zielony, wkurzony, gotowy do bitki.',
-    undead: 'Nie żyje, a i tak gra więcej niż ty.',
-    tauren: 'Muuu. Hitbox jak stodoła.',
-    troll: 'Hej ziomuś, regeneracja na pełnej.',
-    windshaper: 'Ptak z wiatrem pod piórami.',
-    human: 'Najnudniejszy wybór. Gratulacje.',
-    dwarf: 'Broda większa niż twój DPS.',
-    nightelf: 'Znika, gdy trzeba płacić za piwo.',
-    gnome: 'Mały, ale wkurza za trzech.',
-    highorder: 'Ptak, ale z klasą i manierami.'
+    orc: 'Zielony, wkurwiony, gotowy do bitki. Zug zug.',
+    undead: 'Gnije od lat, a i tak gra więcej niż ty.',
+    tauren: 'Muuu. Hitbox jak stodoła, mózg jak u krowy.',
+    troll: 'Hej ziomuś, regen na pełnej, mózg na zero.',
+    windshaper: 'Pierzasty pojeb z wiatrem w dupie.',
+    human: 'Najnudniejszy wybór świata. Gratulacje, kurwa.',
+    dwarf: 'Broda większa niż twój DPS, browar większy niż wątroba.',
+    nightelf: 'Znika, jak trzeba płacić za piwo.',
+    gnome: 'Metr w kapeluszu, a wkurwia za trzech.',
+    highorder: 'Ptak, ale z klasą. Sra tylko na biedotę.'
   };
 
   const CLASS_MEMES = {
-    Druid: 'Kot, miś, drzewo — zdecyduj się w końcu.',
-    Hunter: 'Pet robi robotę, ty zbierasz pochwały.',
-    Mage: 'Woda i chlebek dla gildii, na koszt firmy.',
-    Paladin: 'Bąbelek, hearth, do widzenia.',
-    Priest: 'Leczysz wszystkich, nikt nie dziękuje.',
-    Rogue: 'Stealth i nie ma go na żadnym evencie.',
-    Shaman: 'Totemy, totemy, wszędzie totemy.',
-    Warlock: 'Duszyczki do torby, pet do roboty.',
-    Warrior: 'Krzyczysz i walisz. Proste jak cep.'
+    Druid: 'Kot, miś, drzewo, ptak — zdecyduj się w końcu, kurwa.',
+    Hunter: 'Pet robi całą robotę, ty zbierasz pochwały.',
+    Mage: 'Woda i chlebek dla całej gildii. Kelner z różdżką.',
+    Paladin: 'Bąbelek, hearth, chuj z wami.',
+    Priest: 'Leczysz wszystkich, nikt nie dziękuje. Witaj w życiu.',
+    Rogue: 'Wbija nóż w plecy i znika z odpowiedzialnością.',
+    Shaman: 'Totemy, totemy, wszędzie jebane totemy.',
+    Warlock: 'Duszyczki do torby, pet do roboty, moralność do kosza.',
+    Warrior: 'Drze mordę i napierdala. Proste jak cep.'
   };
 
   const FACTION_PL = { Horde: 'Horda', Alliance: 'Przymierze' };
