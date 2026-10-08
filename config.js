@@ -12,23 +12,23 @@ window.BOGOWIE_CONFIG = {
   // Finał Bo7: wygrywa combo, które pierwsze trafi tyle razy. Musi się zgadzać z schema.sql.
   FINAL_TARGET: 4,
 
-  // Skład gildii. photo = zdjęcie przy nicku, aliases = inne nicki tej samej osoby.
+  // Skład gildii, w tej kolejności na ekranie wyboru profilu.
+  // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga), tag = podpis, aliases = inne nicki.
   PLAYERS: [
-    { nick: 'Bartas', photo: 'img/bartas.jpg' },
-    { nick: 'Zdzichuj', aliases: ['Adam'] },
-    { nick: 'Eroth' },
-    { nick: 'Fintek' },
-    { nick: 'Hazeg' }
+    { nick: 'Bartas', photo: 'img/bartas.jpg', tag: 'Bartek i Druid' },
+    { nick: 'Zdzichuj', aliases: ['Adam'], art: 'soon', tag: 'aka Adam' },
+    { nick: 'Eroth', art: 'soon', tag: 'ten od strony' },
+    { nick: 'Fintek', art: 'soon', tag: 'fotka w drodze' },
+    { nick: 'VenQ', art: 'soon', tag: 'fotka w drodze' },
+    { nick: 'Hazeg', art: 'soon', tag: 'fotka w drodze' },
+    { nick: 'Cebulka', art: 'onion', tag: 'płaczesz, jak go kroisz' },
+    { nick: 'Eerion', art: 'void', tag: 'pustka' },
+    { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' }
   ],
 
-  // Polaroidy w nagłówku.
-  PHOTOS: [
-    { src: 'img/gracz-a.jpg', caption: 'raid leader po godzinach' },
-    { src: 'img/gracz-b.jpg', caption: 'jeszcze jeden dungeon i spać' },
-    { src: 'img/bartas.jpg', caption: 'Bartek w szczytowej formie' },
-    { src: 'img/gracz-c.jpg', caption: 'po piątym monsterze' },
-    { src: 'img/gracz-d.jpg', caption: 'właśnie wylosował Gnoma' }
-  ],
+  // Zdjęcia czekające na przypisanie (do wpisania w PLAYERS jako photo):
+  // img/gracz-a.jpg — łysy w okularach, img/gracz-b.jpg — w słuchawkach,
+  // img/gracz-c.jpg — śpiący na kanapie, img/gracz-d.jpg — śmiejący się.
 
   // Własne dźwięki zamiast syntezatora.
   // Nazwy: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win, druid.

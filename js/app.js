@@ -66,6 +66,9 @@
     if (p && p.photo) {
       return `<img class="avatar" src="${esc(p.photo)}" alt="" width="${s}" height="${s}" style="width:${s}px;height:${s}px" loading="lazy">`;
     }
+    if (p && p.art) {
+      return `<span class="avatar avatar-art" style="width:${s}px;height:${s}px">${I.art(p.art, p.nick)}</span>`;
+    }
     let h = 0; for (const ch of String(nick || '?')) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
     return `<span class="avatar avatar-txt" style="width:${s}px;height:${s}px;font-size:${Math.round(s * 0.45)}px;background:hsl(${h % 360} 55% 42%)">${esc((nick || '?').trim().charAt(0).toUpperCase())}</span>`;
   }
@@ -460,13 +463,34 @@
 
   /* ---------- nagłówek ---------- */
 
-  function renderPhotos() {
-    const box = $('#photos');
-    const photos = (cfg.PHOTOS || []).slice(0, 5);
-    const rot = [-7, 4, -3, 6, -5];
-    box.innerHTML = photos.length
-      ? photos.map((p, i) => `<figure class="polaroid" style="--r:${rot[i]}deg"><img src="${esc(p.src)}" alt="${esc(p.caption || 'Ktoś z Bogów')}" loading="lazy"><figcaption>${esc(p.caption || '')}</figcaption></figure>`).join('')
-      : '';
+  function renderLanding() {
+    const grid = $('#profiles');
+    grid.innerHTML = PLAYERS.map(p => `
+      <button type="button" class="profile ${state.nick && sameNick(state.nick, p.nick) ? 'on' : ''}" data-nick="${esc(p.nick)}">
+        ${avatar(p.nick, 132)}
+        <span class="profile-nick">${esc(p.nick)}</span>
+        ${p.tag ? `<span class="profile-tag">${esc(p.tag)}</span>` : ''}
+      </button>`).join('');
+    $$('.profile', grid).forEach(b => b.addEventListener('click', () => enterAs(b.dataset.nick)));
+    const back = $('#welcomeBack');
+    if (state.nick) {
+      back.hidden = false;
+      back.innerHTML = `${avatar(state.nick, 44)}<span>Siema znowu, <b>${esc(state.nick)}</b>.</span><button type="button" class="btn" id="enterSaved">Wchodzę jako ${esc(state.nick)}</button>`;
+      $('#enterSaved').addEventListener('click', () => enterAs(state.nick));
+    } else back.hidden = true;
+  }
+
+  function enterAs(nick) {
+    setNick(nick);
+    S.play('crown');
+    location.hash = '#random';
+  }
+
+  function renderProfileChip() {
+    const chip = $('#profileChip');
+    chip.innerHTML = state.nick
+      ? `${avatar(state.nick, 34)}<span>Grasz jako <b>${esc(state.nick)}</b></span><a href="#start" class="btn btn-ghost btn-sm">Zmień</a>`
+      : '<span>Tylko oglądasz.</span><a href="#start" class="btn btn-ghost btn-sm">Wybierz profil</a>';
   }
 
   function setupToggles() {
@@ -544,7 +568,7 @@
   function setNick(nick) {
     state.nick = nick;
     try { nick ? localStorage.setItem('bogowie:nick', nick) : localStorage.removeItem('bogowie:nick'); } catch (e) { /* ignore */ }
-    renderTournament();
+    renderTournament(); renderProfileChip(); renderLanding();
   }
 
   function renderTournament() {
@@ -554,27 +578,12 @@
       ? `<div class="banner demo"><b>TRYB DEMO.</b> Baza jeszcze niepodpięta, więc wpisy lądują tylko w tej przeglądarce. Do testów zajebiście, do turnieju chujowo.</div>` : '';
 
     if (!state.nick) {
-      const chips = knownNicks().map(n => `<button type="button" class="nick-chip" data-nick="${esc(n)}">${avatar(n, 40)}<span>${esc(n)}</span></button>`).join('');
       box.innerHTML = `${demo}
-        <div class="panel">
-          <h3>Kim ty w ogóle jesteś?</h3>
-          <p class="muted">Kliknij swoją mordę albo wpisz nick. Zapamiętamy go na tym urządzeniu, żebyś nie musiał się przedstawiać jak na pierwszej randce.</p>
-          ${chips ? `<div class="nick-chips">${chips}</div>` : ''}
-          <form class="nick-form" id="nickForm" novalidate>
-            <label for="nickInput" class="small">Nowy w ekipie? Wpisz nick:</label>
-            <div class="nick-row"><input id="nickInput" class="input" maxlength="24" autocomplete="nickname" placeholder="np. Zdzichuj">
-            <button type="submit" class="btn">To ja, kurwa</button></div>
-          </form>
+        <div class="panel center">
+          <h3>A ty to kto?</h3>
+          <p class="muted">Turniej gra się pod swoim nickiem. Wróć na start i kliknij swoją mordę.</p>
+          <a class="btn btn-big" href="#start">Wybierz profil</a>
         </div>`;
-      $$('.nick-chip', box).forEach(b => b.addEventListener('click', () => { S.play('tick'); setNick(b.dataset.nick); }));
-      $('#nickForm').addEventListener('submit', ev => {
-        ev.preventDefault();
-        try {
-          const n = B.cleanNick($('#nickInput').value);
-          const p = playerOf(n);
-          setNick(p ? p.nick : n);
-        } catch (e) { toast(e.message, true); }
-      });
       return;
     }
 
@@ -586,8 +595,7 @@
     const avail = eventDays().filter(d => d <= today && !taken.has(d));
     if (!avail.includes(state.selectedDate)) state.selectedDate = avail.includes(today) ? today : (avail[avail.length - 1] || null);
 
-    const userBar = `<div class="userbar">${avatar(nick, 48)}<span>Grasz jako <b>${esc(nick)}</b>. Powodzenia, bo się przyda.</span>
-      <button type="button" class="btn btn-ghost btn-sm" id="changeNick">To nie ja</button></div>`;
+    const userBar = `<div class="userbar">${avatar(nick, 48)}<span>Grasz jako <b>${esc(nick)}</b>. Powodzenia, bo się przyda.</span></div>`;
 
     let form;
     if (over) form = `<div class="panel center"><h3>Po ptokach</h3><p class="muted">Ostatni turniej był ${fmtDate(cfg.EVENT_END, { year: 'numeric' })}. Zostały wyniki i wymówki.</p></div>`;
@@ -621,7 +629,6 @@
       <div id="tourReveal" class="reveal-box" hidden></div>
       <div class="panel"><h3>Twoje turnieje</h3>${history ? `<ul class="history">${history}</ul>` : '<p class="muted">Pusto. Jak w twoim banku po wizycie na AH.</p>'}</div>`;
 
-    $('#changeNick').addEventListener('click', () => setNick(null));
     if ($('#tourFaction')) factionPicker($('#tourFaction'), state.faction, f => { state.faction = f; });
     $$('.cal.pick .day').forEach(b => b.addEventListener('click', () => {
       state.selectedDate = b.dataset.d;
@@ -731,7 +738,7 @@
       const c = u.combos[ck] = u.combos[ck] || { race: e.winner_race, cls: e.winner_class, n: 0, last: '' };
       c.n++; if (e.t_date > c.last) c.last = e.t_date;
     });
-    const list = Object.values(users).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name));
+    const list = Object.values(users).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'pl'));
     if (!list.length) { $('#playersBody').innerHTML = '<p class="muted">Nikt jeszcze nie zagrał. Same cykory.</p>'; return; }
     const medals = ['gold', 'silver', 'bronze'];
     $('#playersBody').innerHTML = `<div class="players">${list.map(u => {
@@ -748,23 +755,31 @@
   /* ---------- nawigacja i start ---------- */
 
   function route() {
-    const id = (location.hash || '#random').slice(1);
-    const known = ['random', 'turniej', 'kalendarz', 'gracze'];
-    const cur = known.includes(id) ? id : 'random';
-    known.forEach(k => { $('#sec-' + k).hidden = k !== cur; });
-    $$('.nav a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + cur ? 'page' : 'false'));
+    const id = (location.hash || '#start').slice(1);
+    const known = ['random', 'turniej', 'gracze', 'kalendarz'];
+    const onLanding = !known.includes(id);
+    $('#landing').hidden = !onLanding;
+    $('#app').hidden = onLanding;
+    if (!onLanding) known.forEach(k => { $('#sec-' + k).hidden = k !== id; });
+    $$('.nav a').forEach(a => a.setAttribute('aria-current', a.getAttribute('href') === '#' + id ? 'page' : 'false'));
+    window.scrollTo(0, 0);
   }
 
-  function renderAll() { renderTournament(); renderCalendar(); renderPlayers(); }
+  function renderAll() { renderTournament(); renderCalendar(); renderPlayers(); renderLanding(); renderProfileChip(); }
 
   async function boot() {
     document.body.dataset.faction = state.randFaction;
-    renderPhotos();
     setupToggles();
     setupRandomizer();
     window.addEventListener('hashchange', route);
     route();
-    $('#deadlineTxt').textContent = fmtDate(cfg.EVENT_END, { year: 'numeric' });
+    $$('.deadlineTxt').forEach(el => { el.textContent = fmtDate(cfg.EVENT_END, { year: 'numeric' }); });
+    $('#guestBtn').addEventListener('click', () => { setNick(null); location.hash = '#random'; });
+    $('#otherForm').addEventListener('submit', ev => {
+      ev.preventDefault();
+      try { const n = B.cleanNick($('#otherNick').value); const p = playerOf(n); enterAs(p ? p.nick : n); }
+      catch (e) { toast(e.message, true); }
+    });
     $('#warnCheck').addEventListener('change', e => { $('#warnGo').disabled = !e.target.checked; });
     $('#warnCancel').addEventListener('click', () => $('#warnDialog').close());
     $('#warnGo').addEventListener('click', confirmStart);

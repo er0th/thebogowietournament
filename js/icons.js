@@ -162,11 +162,44 @@
     <path d="M24 24 C24 14 40 14 40 24 C40 32 32 31 32 40" fill="none" stroke="#f2c230" stroke-width="5"/>
     <circle cx="32" cy="49" r="3.4" fill="#f2c230"/>`;
 
+  const ARTS = {
+    onion: `
+      <rect width="64" height="64" fill="#f3e3f5"/>
+      <path d="M30 14 C26 6 22 4 18 4 M33 14 C35 6 40 3 44 4 M32 14 C32 8 32 6 31 2" fill="none" stroke="#4f8a3a" stroke-width="2.6"/>
+      <path d="M32 13 C46 18 54 30 52 44 C50 56 42 61 32 61 C22 61 14 56 12 44 C10 30 18 18 32 13 Z" fill="#c890d4" stroke="${K}" stroke-width="2.6"/>
+      <path d="M32 15 C24 28 24 48 32 60 M32 15 C40 28 40 48 32 60" fill="none" stroke="#9a5fa8" stroke-width="1.6"/>
+      <path d="M21 36 Q25 33 29 36 M35 36 Q39 33 43 36" fill="none" stroke="${K}" stroke-width="2.4"/>
+      <path d="M23 39 C22 44 21 46 22 48" fill="none" stroke="#3fa9e0" stroke-width="2.6"/>
+      <path d="M26 49 Q32 45 38 49" fill="none" stroke="${K}" stroke-width="2.4"/>`,
+    void: `
+      <rect width="64" height="64" fill="#0b0a0a"/>
+      <circle cx="32" cy="32" r="20" fill="none" stroke="#2a2522" stroke-width="2" stroke-dasharray="3 5"/>
+      <circle cx="32" cy="32" r="2" fill="#2a2522"/>`,
+    knaga: `
+      <rect width="64" height="64" fill="#ffd27a"/>
+      <circle cx="9" cy="40" r="10" fill="#e8b28f" stroke="${K}" stroke-width="2.2"/>
+      <circle cx="55" cy="40" r="10" fill="#e8b28f" stroke="${K}" stroke-width="2.2"/>
+      <path d="M8 64 C8 40 16 26 32 26 C48 26 56 40 56 64 Z" fill="#e8b28f" stroke="${K}" stroke-width="2.6"/>
+      <path d="M14 64 C14 46 20 36 26 34 L38 34 C44 36 50 46 50 64 Z" fill="#3b3b42" stroke="${K}" stroke-width="2"/>
+      <path d="M23 46 Q32 50 41 46" fill="none" stroke="#24242a" stroke-width="2"/>
+      <circle cx="32" cy="20" r="7" fill="#e8b28f" stroke="${K}" stroke-width="2.2"/>
+      <path d="M25.5 17 C26 11 38 11 38.5 17" fill="#6b4226" stroke="${K}" stroke-width="1.4"/>
+      <circle cx="29.5" cy="20" r="1" fill="${K}"/><circle cx="34.5" cy="20" r="1" fill="${K}"/>
+      <path d="M30 23.5 H34" stroke="${K}" stroke-width="1.4"/>`,
+    soon: `
+      <rect width="64" height="64" fill="#2a2420"/>
+      <rect x="14" y="22" width="36" height="24" rx="4" fill="none" stroke="#f2c230" stroke-width="2.6"/>
+      <path d="M24 22 L27 17 H37 L40 22" fill="none" stroke="#f2c230" stroke-width="2.6"/>
+      <circle cx="32" cy="34" r="7" fill="none" stroke="#f2c230" stroke-width="2.6"/>
+      <path d="M44 14 L50 8 M48 18 L56 16" stroke="#f2c230" stroke-width="2"/>`
+  };
+
   window.Bogowie = window.Bogowie || {};
   window.Bogowie.Icons = {
     faction: f => wrap(FACTIONS[f] || MYSTERY, f),
     race: id => wrap(RACES[id] || MYSTERY, id),
     cls: c => wrap(CLASSES[c] || MYSTERY, c),
-    mystery: () => wrap(MYSTERY, '?')
+    mystery: () => wrap(MYSTERY, '?'),
+    art: (name, label) => wrap(ARTS[name] || ARTS.soon, label || name).replace('class="ico"', 'class="ico art"')
   };
 })();

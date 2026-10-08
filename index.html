@@ -257,6 +257,37 @@ dialog::backdrop{background:#000b}
 footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dashed var(--line);margin-top:20px}
 
 
+
+/* landing */
+.topbar{padding-top:16px}
+.welcome{text-align:center;padding:10px 0 4px}
+.welcome-kicker{font-family:var(--head);font-size:clamp(22px,3vw,34px);color:var(--gold);text-transform:uppercase;letter-spacing:.2em;margin:0}
+.welcome .title{font-size:clamp(46px,8.5vw,120px)}
+.welcome .title .the{display:none}
+.welcome .tagline{margin-top:12px}
+.choose{padding:34px 0 50px}
+.choose-title{font-family:var(--head);font-weight:400;text-transform:uppercase;font-size:clamp(40px,7vw,84px);margin:0;text-align:center;color:#fff;text-shadow:4px 4px 0 var(--ink),7px 7px 0 var(--blue);transform:rotate(-1.5deg)}
+.choose .sec-lead{text-align:center;margin:10px auto 22px}
+.profiles{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:18px}
+.profile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px 12px;background:var(--paper);color:var(--ink);border:4px solid var(--ink);box-shadow:6px 6px 0 #000;cursor:pointer;transition:transform .12s,box-shadow .12s}
+.profile:nth-child(odd){transform:rotate(-1.2deg)}.profile:nth-child(even){transform:rotate(1.2deg)}
+.profile:hover,.profile:focus-visible{transform:translateY(-6px) rotate(0) scale(1.04);box-shadow:10px 12px 0 #000,0 0 0 4px var(--gold)}
+.profile.on{box-shadow:6px 6px 0 #000,0 0 0 5px var(--gold)}
+.profile .avatar{width:132px!important;height:132px!important;border-radius:6px;border:3px solid var(--ink)}
+.profile-nick{font-family:var(--head);font-size:26px;text-transform:uppercase;line-height:1}
+.profile-tag{font-size:13px;color:#6b5d4c;text-align:center}
+.welcome-back{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:0 0 22px;padding:12px;border:3px dashed var(--gold);background:#2a2109}
+.choose-other{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:26px}
+.choose-other label{display:block;font-weight:600;margin-bottom:6px}
+.avatar-art{display:inline-block;border-radius:50%;overflow:hidden;border:2px solid var(--ink);flex:none}
+.avatar-art .ico{width:100%;height:100%;display:block}
+/* app */
+.appbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:6px 0 4px}
+.mini-logo{font-family:var(--head);font-size:clamp(26px,3.6vw,40px);text-transform:uppercase;text-decoration:none;color:#fff;text-shadow:3px 3px 0 var(--ink),5px 5px 0 var(--red);line-height:1}
+.mini-logo .the{color:var(--gold);font-size:.6em}
+.profile-chip{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:3px solid var(--ink);box-shadow:4px 4px 0 #000;padding:6px 8px 6px 6px}
+.howto{display:grid;gap:10px;max-width:80ch;margin:0 0 20px;color:var(--text)}
+.howto p{margin:0}
 /* hero: obraz */
 .supper{margin:26px 0 0;position:relative;border:6px solid #3b2a18;outline:3px solid var(--gold);box-shadow:10px 10px 0 #000,0 0 60px #0009;background:#000}
 .supper img{display:block;width:100%;height:auto}
@@ -306,35 +337,58 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 <body>
 <a class="skip" href="#main">Przejdź do treści</a>
 <div class="wrap">
-  <header class="top">
-    <div class="topbar">
-      <button type="button" class="btn btn-ghost btn-sm" id="muteBtn" aria-pressed="true">Dźwięk</button>
-    </div>
-    <div class="hero">
-      <div>
-        <h1 class="title"><span class="the">The</span>Bogowie<br>Tournament</h1>
-        <p class="tagline">Los wybiera. Ty płaczesz. Wszyscy się śmieją.</p>
-        <p class="sub">Oficjalny, chuja oficjalny turniej gildii <b>Bogowie Forever</b> w WoW: Forever. Los wybiera ci rasę, klasę i zwycięzcę, a ty masz to przyjąć z godnością. Albo ze skowytem, też się liczy.</p>
-        <span class="sticker">Deadline: <span id="deadlineTxt"></span></span>
-      </div>
-      <div id="photos" aria-label="Zdjęcia ekipy"></div>
+  <div class="topbar">
+    <button type="button" class="btn btn-ghost btn-sm" id="muteBtn" aria-pressed="true">Dźwięk</button>
+  </div>
+
+  <section id="landing" aria-labelledby="h-welcome">
+    <div class="welcome">
+      <p class="welcome-kicker">Welcome to</p>
+      <h1 class="title" id="h-welcome"><span class="the">The</span>Bogowie Tournament</h1>
+      <p class="tagline">Los wybiera. Ty płaczesz. Wszyscy się śmieją.</p>
+      <span class="sticker">Deadline: <span class="deadlineTxt"></span></span>
     </div>
     <figure class="supper">
       <img src="img/wieczerza.jpg" alt="Ostatnia Wieczerza w wersji gildii Bogowie: ekipa przy stole z Monsterami, Red Bullem, Jägerem i burgerem" width="1800" height="916">
       <figcaption><b>Ostatnia Wieczerza Bogów.</b> Olej na płótnie, wartość bezcenna. Jeden z nich zdradzi cię przy rozdzielaniu lootu.</figcaption>
     </figure>
+
+    <div class="choose">
+      <h2 class="choose-title">Choose your player</h2>
+      <p class="sec-lead">Kliknij swoją mordę. Zapamiętamy cię na tym urządzeniu, żebyś nie musiał się przedstawiać jak na pierwszej randce.</p>
+      <div class="welcome-back" id="welcomeBack" hidden></div>
+      <div class="profiles" id="profiles"></div>
+      <div class="choose-other">
+        <form class="nick-form" id="otherForm" novalidate>
+          <label for="otherNick">Nie ma cię na liście? Wpisz swój nick:</label>
+          <div class="nick-row"><input id="otherNick" class="input" maxlength="24" autocomplete="nickname" placeholder="np. Leeroy">
+          <button type="submit" class="btn">To ja, kurwa</button></div>
+        </form>
+        <button type="button" class="btn btn-ghost" id="guestBtn">Tylko popatrzę</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+    <header class="appbar">
+      <a href="#start" class="mini-logo"><span class="the">The</span> Bogowie Tournament</a>
+      <div class="profile-chip" id="profileChip"></div>
+    </header>
     <nav class="nav" aria-label="Sekcje">
       <a href="#random">Randomizer</a>
       <a href="#turniej">Turniej</a>
-      <a href="#kalendarz">Kalendarz</a>
       <a href="#gracze">Gracze</a>
+      <a href="#kalendarz">Kalendarz</a>
     </nav>
-  </header>
 
   <main id="main">
     <section class="sec" id="sec-random" aria-labelledby="h-random">
-      <h2 class="sec-title" id="h-random">Randomizer dla każdego</h2>
-      <p class="sec-lead">Bez nicku, bez zapisu, bez konsekwencji. Kręć do porzygu i sprawdź, co by cię wyruchało w prawdziwym turnieju.</p>
+      <h2 class="sec-title" id="h-random">Co z czym się je</h2>
+      <div class="howto">
+        <p><b>Randomizer</b> to piaskownica. Kręcisz, ile chcesz, nic się nie zapisuje, nikt się nie dowie. Idealne, żeby zobaczyć, jak los cię wyrucha.</p>
+        <p><b>Turniej</b> to już na poważnie. Jeden na dzień na łeb, do <b class="deadlineTxt"></b>. Wynik ląduje w kalendarzu na wieki wieków i nie da się go wymazać.</p>
+        <p><b>Gracze</b> pokazują top 3 combo, które los wciska każdemu z was. <b>Kalendarz</b> pokazuje, kto, kiedy i co wylosował.</p>
+      </div>
       <div class="rules">
         <div class="rule"><b>Etap 1 · Rasy</b><p>5 ras frakcji wchodzi, 2 wypierdalają, z 3 zostaje 1. Trzy razy, więc masz Rasę A, B i C. Mogą się dublować, los ma poczucie humoru.</p></div>
         <div class="rule"><b>Etap 2 · Klasy</b><p>Każda rasa dostaje do 5 swoich klas, 3 przeżywają, 1 wygrywa. Tak rodzą się Combo 1, 2 i 3.</p></div>
@@ -358,6 +412,11 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       <div id="tourBody"></div>
     </section>
 
+    <section class="sec" id="sec-gracze" aria-labelledby="h-gracze" hidden>
+      <h2 class="sec-title" id="h-gracze">Gracze i ich top 3</h2>
+      <p class="sec-lead">Ulubione combo losu u każdego z was. Im dłużej trwa event, tym śmieszniej się dubluje.</p>
+      <div id="playersBody"></div>
+    </section>
     <section class="sec" id="sec-kalendarz" aria-labelledby="h-kal" hidden>
       <h2 class="sec-title" id="h-kal">Kalendarz wyników</h2>
       <p class="sec-lead">Kto, kiedy i co wylosował. Widzi każdy, wstydzi się tylko zainteresowany.</p>
@@ -367,12 +426,8 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       </div>
     </section>
 
-    <section class="sec" id="sec-gracze" aria-labelledby="h-gracze" hidden>
-      <h2 class="sec-title" id="h-gracze">Gracze i ich top 3</h2>
-      <p class="sec-lead">Ulubione combo losu u każdego z was. Im dłużej trwa event, tym śmieszniej się dubluje.</p>
-      <div id="playersBody"></div>
-    </section>
   </main>
+  </div>
 
   <footer>
     TheBogowieTournament · fanowski projekt gildii Bogowie Forever. Niepowiązany z Blizzard Entertainment. World of Warcraft to znak towarowy Blizzarda. Ikony narysowane od zera, z miłością i bez talentu. Obraz: ręcznie malowana herezja.
