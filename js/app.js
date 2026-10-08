@@ -16,6 +16,14 @@
   const STAMPS = ['WYPIERDALAJ', 'NARA', 'WYPAD', 'NOPE', 'PA PA', 'DO PIACHU', 'PŁACZ', 'SKOWYT', 'AUUU', 'SPADAJ'];
   const SLOT = ['A', 'B', 'C'];
 
+  // Turnieje rozpoczęte w tej przeglądarce, jeszcze nie odsłonięte (wynik + token odsłonięcia).
+  const PENDING_KEY = 'bogowie:pending';
+  const pendingAll = () => { try { return JSON.parse(localStorage.getItem(PENDING_KEY)) || {}; } catch (e) { return {}; } };
+  const pendingSave = m => { try { localStorage.setItem(PENDING_KEY, JSON.stringify(m)); } catch (e) { /* ignore */ } };
+  const pendingAdd = entry => { const m = pendingAll(); m[entry.id] = entry; pendingSave(m); };
+  const pendingDrop = id => { const m = pendingAll(); delete m[id]; pendingSave(m); };
+  const PENDING_TXT = 'Los jeszcze się kręci…';
+
   // Głos combo (rasa+klasa), a jak go nie ma, to klasy.
   function comboVoice(race, cls) {
     return S.voice(`combo:${race}|${cls}`) || S.voice(`class:${cls}`);
@@ -484,6 +492,8 @@
     nextBtn.addEventListener('click', step);
 
     renderAt();
+    // Wznowiony turniej, który był już przeklikany do końca: dokończ odsłonięcie.
+    if (pos >= beats.length && opts.onDone) opts.onDone();
     return { finished: () => pos >= beats.length };
   }
 
@@ -649,11 +659,17 @@
         </div>`;
     }
 
-    const history = mine.slice().sort((a, b) => b.t_date.localeCompare(a.t_date)).map(e => `
-      <li><span class="date">${fmtDate(e.t_date)}</span>${comboChip(e.winner_race, e.winner_class)}
+    const pend = pendingAll();
+    const history = mine.slice().sort((a, b) => b.t_date.localeCompare(a.t_date)).map(e => e.revealed === false
+      ? `<li><span class="date">${fmtDate(e.t_date)}</span><span class="pending-chip">${PENDING_TXT}</span>
+        ${pend[e.id] ? `<button type="button" class="btn btn-sm" data-resume="${esc(e.id)}">Dokończ losowanie</button>` : '<span class="muted small">odsłoni się samo po 6 godzinach</span>'}</li>`
+      : `<li><span class="date">${fmtDate(e.t_date)}</span>${comboChip(e.winner_race, e.winner_class)}
       <button type="button" class="btn btn-ghost btn-sm" data-replay="${esc(e.id)}">Obejrzyj jeszcze raz</button></li>`).join('');
+    const unfinished = mine.find(e => e.revealed === false && pend[e.id]);
+    const resumeBanner = unfinished
+      ? `<div class="banner"><b>Masz niedokończony turniej</b> (${esc(fmtDate(unfinished.t_date))}). Nikt nie zna wyniku, nawet ty. <button type="button" class="btn btn-sm" data-resume="${esc(unfinished.id)}">Dokończ losowanie</button></div>` : '';
 
-    box.innerHTML = `${demo}${userBar}${form}
+    box.innerHTML = `${demo}${userBar}${resumeBanner}${form}
       <div id="tourReveal" class="reveal-box" hidden></div>
       <div class="panel"><h3>Twoje turnieje</h3>${history ? `<ul class="history">${history}</ul>` : '<p class="muted">Pusto. Jak w twoim banku po wizycie na AH.</p>'}</div>`;
 
@@ -667,16 +683,34 @@
     if ($('#startBtn')) $('#startBtn').addEventListener('click', openWarning);
     $$('[data-replay]').forEach(b => b.addEventListener('click', () => {
       const e = state.entries.find(x => x.id === b.dataset.replay);
-      if (e) showTourReveal(e);
+      if (e && e.result) showTourReveal(e);
+    }));
+    $$('[data-resume]').forEach(b => b.addEventListener('click', () => {
+      const e = pendingAll()[b.dataset.resume];
+      if (e) showTourReveal(e, true);
     }));
   }
 
-  function showTourReveal(entry) {
+  // pending = true: wynik jeszcze ukryty dla innych; po przeklikaniu odsłaniamy go w bazie.
+  function showTourReveal(entry, pending) {
     const box = $('#tourReveal');
     box.hidden = false;
     Reveal(box, entry.result, {
       key: 'bogowie:reveal:' + entry.id,
-      actions(el) { el.innerHTML = '<a class="btn" href="#kalendarz">Pokaż w kalendarzu</a>'; }
+      actions(el) { el.innerHTML = '<a class="btn" href="#kalendarz">Pokaż w kalendarzu</a>'; },
+      async onDone() {
+        if (!pending) return;
+        try {
+          await api.reveal(entry.id, entry.reveal_token);
+          pendingDrop(entry.id);
+          state.entries = await api.listEntries();
+          renderCalendar(); renderPlayers();
+          const hist = $('#tourBody .history');
+          if (hist) { const keep = $('#tourReveal'); renderTournament(); const nb = $('#tourReveal'); nb.replaceWith(keep); }
+        } catch (e) {
+          toast('Nie udało się zapisać odsłonięcia: ' + e.message + '. Wynik pokaże się sam po 6 godzinach.', true);
+        }
+      }
     });
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -696,11 +730,12 @@
     go.textContent = 'Los się ładuje…';
     try {
       const entry = await api.start(state.nick, state.faction, state.selectedDate);
+      pendingAdd(entry);
       S.play('readycheck');
       $('#warnDialog').close();
       state.entries = await api.listEntries();
       renderAll();
-      showTourReveal(state.entries.find(e => e.id === entry.id) || entry);
+      showTourReveal(entry, true);
     } catch (e) {
       toast(e.message, true);
     } finally {
@@ -712,6 +747,12 @@
   /* ---------- kalendarz ---------- */
 
   function entryCard(e) {
+    if (e.revealed === false) {
+      return `<article class="entry">
+      <header>${avatar(e.nick, 40)}<b>${esc(e.nick)}</b><span class="mini fac">${I.faction(e.faction)}</span><span class="muted small">${esc(B.FACTION_PL[e.faction] || e.faction)}</span></header>
+      <div class="entry-win"><span class="pending-chip">${PENDING_TXT}</span><span class="muted small">wynik po przeklikaniu turnieju</span></div>
+    </article>`;
+    }
     const r = e.result || {};
     const fin = r.final ? (() => { const c = [0, 0, 0]; r.final.sequence.forEach(s => c[s]++); return c.join(':'); })() : '';
     const byClass = r.order === 'class';
@@ -764,6 +805,7 @@
       const k = B.nickKey(p ? p.nick : e.nick);
       const u = users[k] = users[k] || { name: e.nick, n: 0, combos: {} };
       u.n++;
+      if (!e.winner_race) return;
       const ck = e.winner_race + '|' + e.winner_class;
       const c = u.combos[ck] = u.combos[ck] || { race: e.winner_race, cls: e.winner_class, n: 0, last: '' };
       c.n++; if (e.t_date > c.last) c.last = e.t_date;

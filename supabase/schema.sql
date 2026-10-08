@@ -5,7 +5,9 @@
 --   * jeden wpis na nick na dzień (wielkość liter bez znaczenia),
 --   * dzień: od startu eventu do dziś (czas polski), nigdy w przyszłość, najpóźniej deadline,
 --   * całe losowanie robi serwer, więc odświeżanie strony nic nie zmienia,
---   * wpisów nie da się edytować ani usuwać ze strony. Usuwa admin w Table Editor.
+--   * wpisów nie da się edytować ani usuwać ze strony. Usuwa admin w Table Editor,
+--   * wynik jest ukryty dla wszystkich, dopóki gracz nie przeklika turnieju do końca
+--     (albo po 6 godzinach, gdyby ktoś zamknął stronę w połowie).
 
 -- Sprzątanie po pierwszej wersji (logowanie Discordem). Bezpieczne, jeśli ich nie ma.
 drop function if exists public.start_tournament(text, date);
@@ -13,6 +15,7 @@ drop function if exists public.admin_delete_tournament(uuid);
 drop function if exists public.is_admin();
 drop table if exists public.admins;
 drop table if exists public.tournaments;
+drop function if exists public.start_tournament(text, text, date);
 
 -- ---------- ustawienia eventu ----------
 create or replace function public.event_start()  returns date language sql immutable as $$ select date '2026-10-08' $$;
@@ -54,12 +57,26 @@ create table if not exists public.entries (
   winner_class text not null,
   created_at   timestamptz not null default now()
 );
+alter table public.entries add column if not exists revealed boolean not null default true;
+alter table public.entries add column if not exists reveal_token uuid not null default gen_random_uuid();
+alter table public.entries alter column revealed set default false;
 create unique index if not exists entries_nick_day on public.entries (lower(nick), t_date);
 create index if not exists entries_date_idx on public.entries (t_date);
 alter table public.entries enable row level security;
 drop policy if exists "results are public" on public.entries;
-create policy "results are public" on public.entries for select using (true);
--- Brak polityk insert/update/delete: zapisuje wyłącznie funkcja start_tournament.
+-- Bez polityk: tabeli nie da się czytać ani zmieniać bezpośrednio. Strona czyta widok
+-- entries_public (z ukrytymi wynikami), a zapisuje wyłącznie przez funkcje poniżej.
+revoke all on public.entries from anon, authenticated;
+
+create or replace view public.entries_public as
+select
+  id, nick, faction, t_date, created_at,
+  (revealed or created_at < now() - interval '6 hours') as revealed,
+  case when revealed or created_at < now() - interval '6 hours' then result end as result,
+  case when revealed or created_at < now() - interval '6 hours' then winner_race end as winner_race,
+  case when revealed or created_at < now() - interval '6 hours' then winner_class end as winner_class
+from public.entries;
+grant select on public.entries_public to anon, authenticated;
 
 -- ---------- losowanie ----------
 -- Jedno losowanie: do 5 kandydatów → 3 przechodzą → 1 wygrywa.
@@ -80,7 +97,7 @@ begin
 end $$;
 
 create or replace function public.start_tournament(p_nick text, p_faction text, p_date date)
-returns public.entries
+returns jsonb
 language plpgsql volatile security definer set search_path = public as $$
 declare
   v_nick   text := btrim(regexp_replace(coalesce(p_nick, ''), '\s+', ' ', 'g'));
@@ -139,14 +156,22 @@ begin
     v_s2 -> v_pick ->> 'cls'
   )
   returning * into v_row;
-  return v_row;
+  -- Token zna tylko ta przeglądarka; tylko ona może potem odsłonić wynik.
+  return to_jsonb(v_row) - 'revealed';
 exception
   when unique_violation then raise exception '% ma już wpis na ten dzień.', v_nick;
 end $$;
 
+-- Odsłonięcie wyniku po przeklikaniu turnieju. Wymaga tokenu z start_tournament.
+create or replace function public.reveal_entry(p_id uuid, p_token uuid)
+returns void language sql volatile security definer set search_path = public as $$
+  update public.entries set revealed = true where id = p_id and reveal_token = p_token;
+$$;
+
 -- ---------- uprawnienia ----------
 revoke all on function public._draw_round(text[]) from public, anon, authenticated;
 grant execute on function public.start_tournament(text, text, date) to anon, authenticated;
+grant execute on function public.reveal_entry(uuid, uuid) to anon, authenticated;
 
 -- ---------- usuwanie wpisu (admin) ----------
 -- Supabase → Table Editor → entries → zaznacz wiersz → Delete.
