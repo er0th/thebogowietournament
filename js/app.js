@@ -368,7 +368,7 @@
         pos++;
         renderFinal(pos - finalStart, pick);
         const hit = $(`.fcard[data-slot="${pick}"]`, area);
-        S.play(S.has('final') ? 'final' : 'boom'); quake(decisive);
+        S.play('boom'); quake(decisive);
         kabooomAt(hit, decisive ? 30 : 14);
         shout(pickOne(SHOUTS));
         if (pos >= beats.length) {
@@ -384,7 +384,12 @@
           renderSide(); renderDone();
           S.play('win');
           const w = B.winnerOf(result);
-          setTimeout(() => comboVoice(w.race, w.cls), 1500);
+          // Dźwięk finału dopiero po wygraniu Bo7, a po nim głos zwycięskiego combo.
+          const fin = S.play('final');
+          let voiced = false;
+          const sayWinner = () => { if (!voiced) { voiced = true; comboVoice(w.race, w.cls); } };
+          if (fin) { fin.addEventListener('ended', sayWinner); setTimeout(sayWinner, 6000); }
+          else setTimeout(sayWinner, 1500);
           confetti(container); poopRain(box); quake(true);
         } else if (finalCounts(pos - finalStart)[pick] === target - 1) {
           say(`Combo ${pick + 1} ma MECZBOLA! Ktoś tu się zaraz posra.`, true);

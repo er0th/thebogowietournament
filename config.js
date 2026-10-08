@@ -29,7 +29,7 @@ window.BOGOWIE_CONFIG = {
 
   // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
   // Ogólne: tick, flip, drum, stamp, sad, howl, heartbeat, boom, crown, win,
-  //   final (każde trafienie w finale), matchpoint (meczbol), readycheck (start turnieju).
+  //   final (po wygraniu Bo7), matchpoint (meczbol), readycheck (start turnieju).
   // Głosy: 'race:<id>', 'class:<Klasa>', 'combo:<rasa>|<Klasa>' (ma pierwszeństwo przed klasą),
   //   'player:<Nick>' (po kliknięciu profilu). Id ras: orc, undead, tauren, troll, windshaper,
   //   human, dwarf, nightelf, gnome, highorder.
