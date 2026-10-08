@@ -186,6 +186,19 @@
       <path d="M25.5 17 C26 11 38 11 38.5 17" fill="#6b4226" stroke="${K}" stroke-width="1.4"/>
       <circle cx="29.5" cy="20" r="1" fill="${K}"/><circle cx="34.5" cy="20" r="1" fill="${K}"/>
       <path d="M30 23.5 H34" stroke="${K}" stroke-width="1.4"/>`,
+    pizza: `
+      <rect width="64" height="64" fill="#fbe7c6"/>
+      <circle cx="32" cy="33" r="27" fill="#d9963f" stroke="#1b1512" stroke-width="2.6"/>
+      <circle cx="32" cy="33" r="22" fill="#d6372b"/>
+      <path d="M14 30 C18 22 26 18 33 19 C42 19 50 26 50 34 C50 40 44 42 40 40 C36 46 28 47 23 43 C17 43 12 37 14 30 Z" fill="#fff6dc" opacity=".92"/>
+      <circle cx="22" cy="28" r="4.5" fill="#fffaf0" stroke="#e9d9b0" stroke-width="1"/>
+      <circle cx="40" cy="25" r="4" fill="#fffaf0" stroke="#e9d9b0" stroke-width="1"/>
+      <circle cx="42" cy="40" r="4.2" fill="#fffaf0" stroke="#e9d9b0" stroke-width="1"/>
+      <circle cx="26" cy="42" r="3.8" fill="#fffaf0" stroke="#e9d9b0" stroke-width="1"/>
+      <path d="M30 31 C32 27 37 28 36 32 C35 35 31 35 30 31 Z" fill="#2f8a2a" stroke="#1b1512" stroke-width="1"/>
+      <path d="M17 36 C18 33 22 33 22 36 C22 39 18 39 17 36 Z" fill="#2f8a2a" stroke="#1b1512" stroke-width="1"/>
+      <path d="M44 31 C46 29 49 31 47 33 C45 35 43 33 44 31 Z" fill="#2f8a2a" stroke="#1b1512" stroke-width="1"/>
+      <path d="M32 6 V60 M5 33 H59 M13 14 L51 52 M51 14 L13 52" stroke="#b8752c" stroke-width="1.2" opacity=".45"/>`,
     clover: `
       <rect width="64" height="64" fill="#e8f7df"/>
       <path d="M32 34 C34 44 38 52 46 60" fill="none" stroke="#2f7a2a" stroke-width="3.4"/>

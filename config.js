@@ -13,7 +13,7 @@ window.BOGOWIE_CONFIG = {
   FINAL_TARGET: 4,
 
   // Skład gildii, w tej kolejności na ekranie wyboru profilu.
-  // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga, clover), tag = podpis, aliases = inne nicki.
+  // photo = zdjęcie, art = rysunek zastępczy (soon, onion, void, knaga, clover, pizza), tag = podpis, aliases = inne nicki.
   PLAYERS: [
     { nick: 'Bartas', aliases: ['Hefek'], photo: 'img/bartas.jpg', tag: 'aka Hefek' },
     { nick: 'Zdzichuj', aliases: ['Adam'], photo: 'img/zdzichuj.jpg', tag: 'aka Adam' },
@@ -24,7 +24,7 @@ window.BOGOWIE_CONFIG = {
     { nick: 'Cebulka', photo: 'img/cebulka.jpg', tag: 'ma warstwy jak ogr' },
     { nick: 'Eerion', art: 'void', tag: 'pustka' },
     { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' },
-    { nick: 'Torrac', art: 'clover', tag: 'farciarz jebany' }
+    { nick: 'Torrac', art: 'pizza', tag: 'farciarz jebany' }
   ],
 
   // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
