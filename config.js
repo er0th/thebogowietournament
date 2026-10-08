@@ -40,11 +40,12 @@ window.BOGOWIE_CONFIG = {
 
     'player:Bartas': 'sfx/bartas.mp3',
     'player:VenQ': 'sfx/venq.mp3',
+    'player:Cebulka': 'sfx/cebulka.mp3',
 
     'race:dwarf': 'sfx/dwarf1.mp3',
 
     'class:Druid': ['sfx/bartek-i-druid.mp3', 'sfx/druid2.mp3', 'sfx/feraldruid1.mp3'],
-    'class:Hunter': 'sfx/hunter1.mp3',
+    'class:Hunter': ['sfx/hunter1.mp3', 'sfx/hunter2.mp3'],
     'class:Mage': 'sfx/mage1.mp3',
     'class:Paladin': 'sfx/paladin1.mp3',
     'class:Priest': ['sfx/priest1.mp3', 'sfx/priest2.mp3', 'sfx/priest3.mp3'],
