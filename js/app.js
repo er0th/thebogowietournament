@@ -178,7 +178,7 @@
       (r.pool ? ['all'].concat(phases) : phases).forEach(phase => beats.push({ ri, phase }));
       roundEnd[ri] = beats.length;
     });
-    let mpSounded = false; // dźwięk meczbola najwyżej raz na finał
+    let mpCount = 0; // ile rund meczbolowych już było w tym finale
     const finalStart = beats.length;
     result.final.sequence.forEach((slot, k) => beats.push({ final: true, k }));
     const cardOf = (round, v, cls) => round.kind === 'race' ? raceCard(v, cls) : classCard(v, round.stage === 2 ? round.data.race : null, cls);
@@ -390,8 +390,9 @@
         box.classList.toggle('redalert', matchPoint);
         if (matchPoint) {
           say('MECZBOL! Ktoś zaraz zesra się ze stresu…', true);
-          // Plik meczbola gra najwyżej raz na finał i nie zawsze; reszta to bicie serca.
-          if (S.has('matchpoint') && !mpSounded && B.randInt(2) === 0) { mpSounded = true; S.play('matchpoint'); await sleep(T(2200)); }
+          // Plik meczbola gra co drugą rundę meczbolową (1., 3., 5.…); pomiędzy bije serce.
+          const mpTurn = mpCount++;
+          if (S.has('matchpoint') && mpTurn % 2 === 0) { S.play('matchpoint'); await sleep(T(2200)); }
           else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
         } else say(pickOne(LINES.final));
         await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
