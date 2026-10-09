@@ -54,7 +54,7 @@ window.BOGOWIE_CONFIG = {
     'class:Druid': ['sfx/druid2.mp3', 'sfx/druid3.mp3', 'sfx/feraldruid1.mp3'],
     'class:Hunter': ['sfx/hunter1.mp3', 'sfx/hunter2.mp3'],
     'class:Mage': 'sfx/mage1.mp3',
-    'class:Paladin': 'sfx/paladin1.mp3',
+    'class:Paladin': ['sfx/paladin1.mp3', 'sfx/paladin2.mp3', 'sfx/paladin3.mp3'],
     'class:Priest': ['sfx/priest1.mp3', 'sfx/priest2.mp3', 'sfx/priest3.mp3'],
     'class:Rogue': ['sfx/rogue1.mp3', 'sfx/rogue2.mp3'],
     'class:Shaman': 'sfx/shaman1.mp3',

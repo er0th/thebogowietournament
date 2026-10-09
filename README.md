@@ -4,13 +4,13 @@ Turniej gildii **Bogowie Forever** w WoW: Forever. Los wybiera rasę, klasę i z
 
 - **Randomizer** — dla każdego, bez logowania i bez zapisu.
 - **Turniej**: gracz wybiera lub wpisuje nick (zapamiętany na urządzeniu), jeden wpis na nick dziennie, wpis nie do usunięcia (poza adminem).
-- **Kalendarz** i **Gracze** (top 3 combo) — widoczne dla wszystkich.
+- **Kalendarz** i **Gracze** (top 3 klasy, a przy każdej rasy) — widoczne dla wszystkich. Dane odświeżają się same co kilkanaście sekund.
 
 Bez konfiguracji Supabase strona działa w **trybie demo**: wpisy turniejowe zapisują się tylko w przeglądarce.
 
 ## Zasady turnieju
 
-1. **Etap 1 · Klasy:** 5 z 9 klas frakcji → 3 → 1. Trzy razy: Klasa A, B, C (mogą się powtarzać). Każda klasa ma równe szanse.
+1. **Etap 1 · Klasy:** wszystkie 9 klas frakcji → 5 → 3 → 1. Trzy razy: Klasa A, B, C (mogą się powtarzać). Każda klasa ma równe szanse.
 2. **Etap 2 · Rasy:** dla każdej klasy do 5 ras, które mogą nią grać → 3 → 1. Wychodzą Combo 1, 2, 3.
 3. **Finał · Bo7:** losujemy spośród 3 combo, aż któreś trafi 4 razy.
 

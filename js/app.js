@@ -163,14 +163,22 @@
     const S1 = byClass ? 'Klasa' : 'Rasa';
     const combos = B.combosOf(result);
     const rounds = [];
-    result.stage1.forEach((r, i) => rounds.push({ stage: 1, i, kind: byClass ? 'class' : 'race', data: r, title: `Losowanie ${i + 1}/3 → ${S1} ${SLOT[i]}` }));
+    // Etap klas startuje od wszystkich klas frakcji (9 → 5 → 3 → 1). Sam wynik się nie zmienia,
+    // bo 5 kandydatów i tak jest losowanych z całej puli.
+    const classPool = byClass ? B.classesOf(result.faction) : [];
+    result.stage1.forEach((r, i) => {
+      const pool = byClass && classPool.length > r.contenders.length ? classPool : null;
+      rounds.push({ stage: 1, i, kind: byClass ? 'class' : 'race', data: r, pool, title: `Losowanie ${i + 1}/3 → ${S1} ${SLOT[i]}` });
+    });
     result.stage2.forEach((r, i) => rounds.push({ stage: 2, i, kind: byClass ? 'race' : 'class', data: r, title: `Losowanie ${i + 1}/3 → Combo ${i + 1} (${byClass ? r.cls : raceName(r.race)})` }));
     // Przy 3 lub mniej kandydatach nie ma kogo wywalać, a przy 1 nie ma nawet wyboru.
     const beats = [], roundEnd = [];
     rounds.forEach((r, ri) => {
-      (r.data.contenders.length > 3 ? ['show', 'cut', 'crown'] : ['show', 'crown']).forEach(phase => beats.push({ ri, phase }));
+      const phases = r.data.contenders.length > 3 ? ['show', 'cut', 'crown'] : ['show', 'crown'];
+      (r.pool ? ['all'].concat(phases) : phases).forEach(phase => beats.push({ ri, phase }));
       roundEnd[ri] = beats.length;
     });
+    let mpSounded = false; // dźwięk meczbola najwyżej raz na finał
     const finalStart = beats.length;
     result.final.sequence.forEach((slot, k) => beats.push({ final: true, k }));
     const cardOf = (round, v, cls) => round.kind === 'race' ? raceCard(v, cls) : classCard(v, round.stage === 2 ? round.data.race : null, cls);
@@ -254,7 +262,8 @@
 
     function cardsFor(round, phase) {
       const d = round.data;
-      if (phase === 'none') return d.contenders.map(() => mysteryCard()).join('');
+      if (phase === 'none') return (round.pool || d.contenders).map(() => mysteryCard()).join('');
+      if (phase === 'all') return round.pool.map(v => cardOf(round, v)).join('');
       return d.contenders.map(v => {
         let cls = '';
         const out = !d.advancing.includes(v);
@@ -275,7 +284,8 @@
       const round = rounds[ri];
       $('.rv-stage', container).textContent = (round.kind === 'race' ? `ETAP ${round.stage} · RASY` : `ETAP ${round.stage} · KLASY`);
       $('.rv-title', container).textContent = round.title;
-      area.innerHTML = `<div class="cards">${cardsFor(round, phase)}</div>`;
+      const many = round.pool && (phase === 'none' || phase === 'all');
+      area.innerHTML = `<div class="cards${many ? ' many' : ''}">${cardsFor(round, phase)}</div>`;
       addStamps();
     }
 
@@ -341,7 +351,9 @@
       } else {
         const r = rounds[b.ri];
         const nOut = r.data.contenders.length - 3;
-        if (b.phase === 'show') label = b.ri === 0 ? 'LOSUJ KANDYDATÓW' : `DALEJ: ${r.stage === 1 ? S1 + ' ' + SLOT[r.i] : 'Combo ' + (r.i + 1)}`;
+        const nextLabel = b.ri === 0 ? (r.pool ? 'POKAŻ WSZYSTKIE KLASY' : 'LOSUJ KANDYDATÓW') : `DALEJ: ${r.stage === 1 ? S1 + ' ' + SLOT[r.i] : 'Combo ' + (r.i + 1)}`;
+        if (b.phase === 'all') label = nextLabel;
+        else if (b.phase === 'show') label = r.pool ? `ZOSTAW ${r.data.contenders.length}` : nextLabel;
         else if (b.phase === 'cut') label = `WYWAL ${nOut}`;
         else label = r.data.contenders.length === 1 ? 'NO TO BIERZ, CO DAJĄ' : 'WYBIERZ 1';
       }
@@ -378,7 +390,8 @@
         box.classList.toggle('redalert', matchPoint);
         if (matchPoint) {
           say('MECZBOL! Ktoś zaraz zesra się ze stresu…', true);
-          if (S.has('matchpoint')) { S.play('matchpoint'); await sleep(T(2200)); }
+          // Plik meczbola gra najwyżej raz na finał i nie zawsze; reszta to bicie serca.
+          if (S.has('matchpoint') && !mpSounded && B.randInt(2) === 0) { mpSounded = true; S.play('matchpoint'); await sleep(T(2200)); }
           else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
         } else say(pickOne(LINES.final));
         await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
@@ -415,7 +428,48 @@
         return;
       }
       const round = rounds[b.ri];
-      if (b.phase === 'show') {
+      if (b.phase === 'all') {
+        // Wszystkie klasy frakcji odkryte naraz.
+        renderSide();
+        renderRound(b.ri, 'none');
+        say(pickOne(['Cała dziewiątka na ringu. Zaraz zrobi się luźniej.', 'Wszystkie klasy w kolejce do rzeźni.', 'Dziewięciu wchodzi, jeden wychodzi.']));
+        S.play('drum');
+        $$('.card', area).forEach(c => c.classList.add('shake'));
+        await sleep(T(1100));
+        const nodes = $$('.card', area);
+        for (let k = 0; k < nodes.length; k++) {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = cardOf(round, round.pool[k]);
+          const fresh = tmp.firstElementChild;
+          fresh.classList.add('flip-in');
+          nodes[k].replaceWith(fresh);
+          S.play('flip');
+          await sleep(T(140));
+        }
+        say(`${round.pool.length} klas. Zostanie ${round.data.contenders.length}. Reszta do piachu.`);
+      } else if (b.phase === 'show' && round.pool) {
+        // Odsiew z 9 do 5: szybkie pieczątki, potem zostają sami kandydaci.
+        const cards = $$('.card', area);
+        const losers = cards.filter(c => !round.data.contenders.includes(c.dataset.v));
+        say(pickOne(LINES.cut));
+        for (const c of B.shuffle(losers)) {
+          cards.forEach(n => n.classList.remove('hot'));
+          c.classList.add('hot');
+          S.play('tick');
+          await sleep(T(260));
+          c.classList.remove('hot');
+          c.classList.add('out');
+          c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>`);
+          S.play('stamp');
+          await sleep(T(320));
+        }
+        quake();
+        S.play('sad');
+        say(`Zostaje ${round.data.contenders.length}. Teraz zaczyna się prawdziwa jazda.`, true);
+        await sleep(T(900));
+        area.innerHTML = `<div class="cards">${round.data.contenders.map(v => cardOf(round, v, 'flip-in')).join('')}</div>`;
+        S.play('flip');
+      } else if (b.phase === 'show') {
         renderSide();
         renderRound(b.ri, 'none');
         say(pickOne(LINES.show));
@@ -458,7 +512,8 @@
         say(alive.length === 1 ? 'Nie ma wyboru, frajerze. Bierzesz, co dają.' : pickOne(LINES.crown), true);
         S.play('drum');
         await sleep(T(900));
-        const fake = alive.length > 1 && B.randInt(2) === 0;
+        // Fałszywy finisz w ok. 35% losowań (wcześniej 50%), za to dłuższy: ping-pong i szach mat.
+        const fake = alive.length > 1 && B.randInt(20) < 7;
         if (alive.length === 1) {
           alive[0].classList.add('hot');
           await sleep(T(700));
@@ -466,13 +521,27 @@
           const near = (idx + alive.length - 1) % alive.length;
           await roulette(alive, near, 3, 650);
           say('TO TEN?!', true);
-          await sleep(T(1100));
-          S.play('tick');
-          alive.forEach(n => n.classList.remove('hot'));
-          alive[idx].classList.add('hot');
-          say('A JEDNAK CHUJA! NIE TEN!', true);
-          quake();
-          await sleep(T(500));
+          for (let h = 0; h < 2; h++) { S.play('heartbeat'); await sleep(T(550)); }
+          // Kilka przeskoków między dwoma kartami, zawsze kończy na zwycięzcy.
+          const hops = 1 + 2 * B.randInt(2);
+          const HOP_LINES = ['A MOŻE TEN?!', 'NIE, CZEKAJ…', 'KURWA, KTÓRY?!', 'TEN!… CHYBA…', 'NIE WYTRZYMAM…'];
+          for (let h = 0; h < hops; h++) {
+            alive.forEach(n => n.classList.remove('hot'));
+            const onWinner = h % 2 === 0;
+            alive[onWinner ? idx : near].classList.add('hot');
+            S.play('tick');
+            if (h < hops - 1) {
+              say(pickOne(HOP_LINES), true);
+              quake();
+              S.play('heartbeat');
+              await sleep(T(650 + h * 120));
+            }
+          }
+          say(pickOne(['SZACH MAT!', 'SZACH MAT, FRAJERZE!', 'A JEDNAK CHUJA! NIE TEN! SZACH MAT!']), true);
+          shout('SZACH MAT ♚');
+          S.play('stamp'); quake(true); flash();
+          kabooomAt(alive[idx], 18);
+          await sleep(T(700));
         } else {
           await roulette(alive, idx, 3, 650);
           await sleep(T(600));
@@ -819,29 +888,39 @@
 
   /* ---------- gracze i top 3 ---------- */
 
+  // Ranking: najpierw klasa (suma wygranych tą klasą), w jej obrębie rasy.
+  // Przykład: 10× Undead Paladin, 7× Orc Mage, 5× Undead Mage → Mage ×12 (Orc 7, Undead 5) przed Paladin ×10.
   function renderPlayers() {
     const users = {};
-    knownNicks().forEach(n => { users[B.nickKey(n)] = { name: n, n: 0, combos: {} }; });
+    knownNicks().forEach(n => { users[B.nickKey(n)] = { name: n, n: 0, classes: {} }; });
     state.entries.forEach(e => {
       const p = playerOf(e.nick);
       const k = B.nickKey(p ? p.nick : e.nick);
-      const u = users[k] = users[k] || { name: e.nick, n: 0, combos: {} };
+      const u = users[k] = users[k] || { name: e.nick, n: 0, classes: {} };
       u.n++;
       if (!e.winner_race) return;
-      const ck = e.winner_race + '|' + e.winner_class;
-      const c = u.combos[ck] = u.combos[ck] || { race: e.winner_race, cls: e.winner_class, n: 0, last: '' };
+      const c = u.classes[e.winner_class] = u.classes[e.winner_class] || { cls: e.winner_class, n: 0, last: '', races: {} };
       c.n++; if (e.t_date > c.last) c.last = e.t_date;
+      const r = c.races[e.winner_race] = c.races[e.winner_race] || { race: e.winner_race, n: 0, last: '' };
+      r.n++; if (e.t_date > r.last) r.last = e.t_date;
     });
+    const byCount = (a, b) => b.n - a.n || b.last.localeCompare(a.last);
     const list = Object.values(users).sort((a, b) => b.n - a.n || a.name.localeCompare(b.name, 'pl'));
     if (!list.length) { $('#playersBody').innerHTML = '<p class="muted">Nikt jeszcze nie zagrał. Same cykory.</p>'; return; }
     const medals = ['gold', 'silver', 'bronze'];
     $('#playersBody').innerHTML = `<div class="players">${list.map(u => {
-      const top = Object.values(u.combos).sort((a, b) => b.n - a.n || b.last.localeCompare(a.last)).slice(0, 3);
+      const top = Object.values(u.classes).sort(byCount).slice(0, 3).map(c => Object.assign({}, c, { raceList: Object.values(c.races).sort(byCount) }));
+      const main = top[0] ? top[0].raceList[0] : null;
       const p = playerOf(u.name);
       const alias = p && p.aliases.length ? ` <span class="muted small">aka ${esc(p.aliases.join(', '))}</span>` : '';
+      const rows = top.map((c, i) => `<li>
+          <div class="cls-row"><span class="medal ${medals[i]}">${i + 1}</span><span class="cls-name" style="--cc:${B.CLASS_COLORS[c.cls] || '#999'}"><span class="mini">${I.cls(c.cls)}</span>${esc(c.cls)}</span><span class="cnt">×${c.n}</span></div>
+          <div class="race-row">${c.raceList.map((r, j) => `<span class="race-chip ${j === 0 ? 'lead' : ''}"><span class="mini">${I.race(r.race)}</span>${esc(raceName(r.race))} ×${r.n}</span>`).join('')}</div>
+        </li>`).join('');
       return `<article class="player">
         <header>${avatar(u.name, 64)}<div><b>${esc(u.name)}</b>${alias}<span class="muted small">${u.n ? `${u.n} ${u.n === 1 ? 'turniej' : 'turniejów'}` : 'jeszcze nie grał, cykor'}</span></div></header>
-        ${top.length ? `<ol class="top3">${top.map((c, i) => `<li><span class="medal ${medals[i]}">${i + 1}</span>${comboChip(c.race, c.cls)}<span class="cnt">×${c.n}</span></li>`).join('')}</ol>` : '<p class="small muted">Zero wyników. Zero chwały.</p>'}
+        ${main ? `<p class="main-line"><span class="muted small">Main według losu:</span> ${comboChip(main.race, top[0].cls)}</p>` : ''}
+        ${top.length ? `<ol class="top3 by-class">${rows}</ol>` : '<p class="small muted">Zero wyników. Zero chwały.</p>'}
       </article>`;
     }).join('')}</div>`;
   }
@@ -883,6 +962,33 @@
       toast('Nie da się pobrać wyników: ' + e.message, true);
     }
     renderAll();
+    startLiveRefresh();
+  }
+
+  // Wyniki innych graczy dociągamy same, bez odświeżania strony: co 15 s, gdy karta jest widoczna,
+  // i od razu po powrocie do karty. Przerysowujemy tylko, gdy coś się zmieniło, i nie ruszamy trwającego losowania.
+  function startLiveRefresh() {
+    const sig = list => list.map(e => `${e.id}:${e.revealed === false ? 0 : 1}:${e.winner_race || ''}`).join(',');
+    let last = sig(state.entries), running = false;
+    async function refresh() {
+      if (document.hidden || running) return;
+      running = true;
+      try {
+        const fresh = await api.listEntries();
+        const s = sig(fresh);
+        if (s === last) return;
+        last = s;
+        state.entries = fresh;
+        renderCalendar();
+        renderPlayers();
+        const rv = $('#tourReveal');
+        if (!rv || rv.hidden) renderTournament();
+      } catch (e) { /* cicho: spróbujemy przy następnym razie */ }
+      finally { running = false; }
+    }
+    setInterval(refresh, 15000);
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
   }
 
   boot();

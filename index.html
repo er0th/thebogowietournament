@@ -238,6 +238,16 @@ h2.sec-title{font-family:var(--head);font-weight:400;text-transform:uppercase;fo
 .medal{width:28px;height:28px;border-radius:50%;display:inline-grid;place-items:center;font-family:var(--head);border:2px solid var(--ink);flex:none}
 .medal.gold{background:#f2c230}.medal.silver{background:#cfd0da}.medal.bronze{background:#c98a54}
 .cnt{margin-left:auto;font-family:var(--head);font-size:18px}
+.main-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 10px}
+.main-line .combo-chip{background:#fff;color:var(--ink)}
+.top3.by-class{gap:10px}
+.top3.by-class li{flex-direction:column;align-items:stretch;gap:4px}
+.cls-row{display:flex;align-items:center;gap:8px}
+.cls-name{display:inline-flex;align-items:center;gap:4px;font-weight:700;border-bottom:3px solid var(--cc);padding-bottom:1px}
+.race-row{display:flex;flex-wrap:wrap;gap:4px;padding-left:36px}
+.race-chip{display:inline-flex;align-items:center;gap:3px;font-size:13px;background:#fff;border:1px solid #0003;padding:1px 6px 1px 2px}
+.race-chip .ico{width:18px;height:18px}
+.race-chip.lead{font-weight:700;border:2px solid var(--ink)}
 
 /* dialog */
 dialog{border:4px solid var(--ink);background:var(--paper);color:var(--ink);padding:0;max-width:560px;width:calc(100% - 32px);box-shadow:10px 10px 0 #000}
@@ -339,6 +349,10 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   .winner-icos .ico{width:72px;height:72px}
   .card-ico .ico{width:64px;height:64px}
   .card-name{font-size:16px}
+  .cards.many{gap:10px}
+  .cards.many .card{width:88px;min-height:118px}
+  .cards.many .card-ico .ico{width:48px;height:48px}
+  .cards.many .card-name{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
@@ -398,10 +412,10 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       <div class="howto">
         <p><b>Randomizer</b> to piaskownica. Kręcisz, ile chcesz, nic się nie zapisuje, nikt się nie dowie. Idealne, żeby zobaczyć, jak los cię wyrucha.</p>
         <p><b>Turniej</b> to już na poważnie. Jeden na dzień na łeb, do <b class="deadlineTxt"></b>. Wynik ląduje w kalendarzu na wieki wieków i nie da się go wymazać.</p>
-        <p><b>Gracze</b> pokazują top 3 combo, które los wciska każdemu z was. <b>Kalendarz</b> pokazuje, kto, kiedy i co wylosował.</p>
+        <p><b>Gracze</b> pokazują top 3 klasy, które los wciska każdemu z was, a przy każdej rasy, które z nią wypadły. <b>Kalendarz</b> pokazuje, kto, kiedy i co wylosował.</p>
       </div>
       <div class="rules">
-        <div class="rule"><b>Etap 1 · Klasy</b><p>5 klas wchodzi, 2 wypierdalają, z 3 zostaje 1. Trzy razy, więc masz Klasę A, B i C. Mogą się dublować, los ma poczucie humoru.</p></div>
+        <div class="rule"><b>Etap 1 · Klasy</b><p>Startuje wszystkie 9 klas, zostaje 5, potem 3, na końcu 1. Trzy razy, więc masz Klasę A, B i C. Mogą się dublować, los ma poczucie humoru.</p></div>
         <div class="rule"><b>Etap 2 · Rasy</b><p>Każda klasa dostaje rasy, które mogą nią grać, i jedna wygrywa. Tak rodzą się Combo 1, 2 i 3. Paladyn w Hordzie? Undead i chuj, nie ma wyboru.</p></div>
         <div class="rule"><b>Finał · Bo7</b><p>Kręcimy w kółko między trzema combo. Które pierwsze trafi 4 razy, ten wygrywa dzień. Reszta płacze.</p></div>
       </div>
