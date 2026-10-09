@@ -555,7 +555,8 @@
         S.play('crown');
         if (round.stage === 2) {
           const c = combos[round.i];
-          S.voice(`combo:${c.race}|${c.cls}`) || S.voice(byClass ? 'race:' + c.race : 'class:' + c.cls);
+          // Combo → rasa → klasa: większość ras nie ma własnego głosu, więc wtedy mówi klasa.
+          S.voice(`combo:${c.race}|${c.cls}`) || S.voice('race:' + c.race) || S.voice('class:' + c.cls);
         } else S.voice((round.kind === 'class' ? 'class:' : 'race:') + round.data.winner);
         say(`${w.querySelector('.card-name').textContent}! Jedni się cieszą, reszta płacze w poduszkę.`, true);
       }
