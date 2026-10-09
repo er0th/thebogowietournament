@@ -130,10 +130,12 @@
     a.play().catch(() => {});
     return a;
   }
+  // Głośność wybranych dźwięków (domyślnie 0.85). Ready check na starcie turnieju był za głośny.
+  const VOLUME = { readycheck: 0.35 };
   function play(name) {
     if (muted) return null;
     try {
-      if (has(name)) return playFile(fileFor(name));
+      if (has(name)) return playFile(fileFor(name), VOLUME[name]);
       const v = SYNTH[name];
       if (v) v[Math.floor(Math.random() * v.length)]();
     } catch (e) { /* dźwięk to tylko bonus */ }
