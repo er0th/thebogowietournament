@@ -141,14 +141,37 @@
     } catch (e) { /* dźwięk to tylko bonus */ }
     return null;
   }
-  // Kwestie głosowe: nowa ucisza poprzednią, żeby się nie nakładały.
-  function voice(name) {
-    if (muted || !has(name)) return false;
+  // Jeden kanał na wszystkie nagrania (głosy, finał, meczbol, reakcje), żeby się nie nakładały.
+  // Nowe nagranie wycisza poprzednie krótkim ściszeniem; opcja soft = nie przerywaj, jeśli coś gra.
+  const busy = () => !!(voiceNow && !voiceNow.paused && !voiceNow.ended);
+  function fadeOut(a) {
+    a.fading = true;
+    const start = a.volume;
+    let k = 0;
+    const id = setInterval(() => {
+      k++;
+      a.volume = Math.max(0, start * (1 - k / 6));
+      if (k >= 6) { clearInterval(id); a.pause(); }
+    }, 25);
+  }
+  function voice(name, opts) {
+    if (muted || !has(name)) return null;
+    if (opts && opts.soft && busy()) return null;
     try {
-      if (voiceNow) { voiceNow.pause(); voiceNow = null; }
-      voiceNow = playFile(fileFor(name), 0.95);
-      return true;
-    } catch (e) { return false; }
+      if (voiceNow) { const old = voiceNow; voiceNow = null; if (!old.paused && !old.ended) fadeOut(old); }
+      voiceNow = playFile(fileFor(name), VOLUME[name] != null ? VOLUME[name] : 0.95);
+      return voiceNow;
+    } catch (e) { return null; }
+  }
+  // Czeka, aż skończy się bieżące nagranie (najdłużej maxMs).
+  function voiceDone(maxMs) {
+    return new Promise(resolve => {
+      if (!busy()) { resolve(); return; }
+      const a = voiceNow;
+      const t = setTimeout(resolve, maxMs || 3000);
+      a.addEventListener('ended', () => { clearTimeout(t); resolve(); }, { once: true });
+      a.addEventListener('pause', () => { clearTimeout(t); resolve(); }, { once: true });
+    });
   }
 
   // Wszystkie pliki przypisane do danej nazwy (np. 'player:Fintek').
@@ -157,7 +180,7 @@
   function voiceSrc(src) {
     if (muted) return false;
     try {
-      if (voiceNow) { voiceNow.pause(); voiceNow = null; }
+      if (voiceNow) { const old = voiceNow; voiceNow = null; if (!old.paused && !old.ended) fadeOut(old); }
       voiceNow = playFile(src, 0.95);
       return true;
     } catch (e) { return false; }
@@ -167,6 +190,7 @@
   window.Bogowie.Sfx = {
     play,
     voice,
+    voiceDone,
     voiceSrc,
     list,
     has,

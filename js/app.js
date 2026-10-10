@@ -392,7 +392,7 @@
           say('MECZBOL! Ktoś zaraz zesra się ze stresu…', true);
           // Plik meczbola gra co drugą rundę meczbolową (1., 3., 5.…); pomiędzy bije serce.
           const mpTurn = mpCount++;
-          if (S.has('matchpoint') && mpTurn % 2 === 0) { S.play('matchpoint'); await sleep(T(2200)); }
+          if (S.has('matchpoint') && mpTurn % 2 === 0) { S.voice('matchpoint'); await sleep(T(2200)); }
           else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(700)); }
         } else say(pickOne(LINES.final));
         await roulette($$('.fcard', area), pick, matchPoint ? 3 : 1, matchPoint ? 900 : 420);
@@ -403,7 +403,7 @@
         kabooomAt(hit, decisive ? 30 : 14);
         shout(pickOne(SHOUTS));
         // Reakcja głosowa na trafienie w trakcie finału (ok. 40% trafień, nie na ostatnie).
-        if (pos < beats.length && B.randInt(5) < 2) S.voice('final2');
+        if (pos < beats.length && B.randInt(5) < 2) S.voice('final2', { soft: true });
         if (pos >= beats.length) {
           box.classList.remove('redalert');
           say('KONIEC. ZACIŚNIJ POŚLADKI.', true);
@@ -416,13 +416,13 @@
             await sleep(T(650));
           }
           renderSide(); renderDone();
-          S.play('win');
           const w = B.winnerOf(result);
-          // Dźwięk finału dopiero po wygraniu Bo7, a po nim głos zwycięskiego combo.
-          const fin = S.play('final');
+          // Dźwięk finału dopiero po wygraniu Bo7 (zamiast level-upa, nie razem z nim), a po nim głos zwycięskiego combo.
+          const fin = S.voice('final');
+          if (!fin) S.play('win');
           let voiced = false;
           const sayWinner = () => { if (!voiced) { voiced = true; comboVoice(w.race, w.cls); } };
-          if (fin) { fin.addEventListener('ended', sayWinner); setTimeout(sayWinner, 6000); }
+          if (fin) { fin.addEventListener('ended', sayWinner); setTimeout(sayWinner, 9000); }
           else setTimeout(sayWinner, 1500);
           confetti(container); poopRain(box); quake(true);
         } else if (finalCounts(pos - finalStart)[pick] === target - 1) {
@@ -506,7 +506,7 @@
           S.play('stamp'); quake();
           await sleep(T(250));
           // Co trzecia wywalona karta (losowo) dostaje „aua”, reszta syntezatorowy skowyt.
-          if (!(B.randInt(3) === 0 && S.voice('out'))) S.play(li % 2 ? 'sad' : 'howl');
+          if (!(B.randInt(3) === 0 && S.voice('out', { soft: true }))) S.play(li % 2 ? 'sad' : 'howl');
           say(`${c.querySelector('.card-name').textContent}… ${pickOne(DEATHS)}`, true);
           await sleep(T(1100));
         }
@@ -558,6 +558,8 @@
         w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
         S.play('crown');
+        // Po szach macie niech „nie mogę” wybrzmi, zanim odezwie się zwycięzca.
+        if (fake) await S.voiceDone(2200);
         if (round.stage === 2) {
           const c = combos[round.i];
           // Combo → rasa → klasa: większość ras nie ma własnego głosu, więc wtedy mówi klasa.
@@ -654,7 +656,7 @@
   function setupRandomizer() {
     factionPicker($('#randFaction'), state.randFaction, f => { state.randFaction = f; });
     $('#randGo').addEventListener('click', () => {
-      S.play('readycheck');
+      S.voice('readycheck');
       const result = B.runTournament(state.randFaction, cfg.FINAL_TARGET);
       const box = $('#randReveal');
       box.hidden = false;
@@ -829,7 +831,7 @@
     try {
       const entry = await api.start(state.nick, state.faction, state.selectedDate);
       pendingAdd(entry);
-      S.play('readycheck');
+      S.voice('readycheck');
       $('#warnDialog').close();
       state.entries = await api.listEntries();
       renderAll();
