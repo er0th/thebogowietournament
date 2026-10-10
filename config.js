@@ -24,7 +24,8 @@ window.BOGOWIE_CONFIG = {
     { nick: 'Cebulka', photo: 'img/cebulka.jpg', tag: 'ma warstwy jak ogr' },
     { nick: 'Eerion', art: 'void', tag: 'pustka' },
     { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' },
-    { nick: 'Torrac', art: 'pizza', tag: 'farciarz jebany' }
+    { nick: 'Torrac', art: 'pizza', tag: 'farciarz jebany' },
+    { nick: 'Theo', photo: 'img/theo.jpg', tag: 'świeże mięso' }
   ],
 
   // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
@@ -48,6 +49,7 @@ window.BOGOWIE_CONFIG = {
     'player:Eroth': 'sfx/eroth.mp3',
     'player:Eerion': 'sfx/eerion.mp3',
     'player:Torrac': 'sfx/torrac.mp3',
+    'player:Theo': 'sfx/theo.mp3',
 
     'race:dwarf': 'sfx/dwarf1.mp3',
 
