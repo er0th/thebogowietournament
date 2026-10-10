@@ -402,6 +402,8 @@
         S.play('boom'); quake(decisive);
         kabooomAt(hit, decisive ? 30 : 14);
         shout(pickOne(SHOUTS));
+        // Reakcja głosowa na trafienie w trakcie finału (ok. 40% trafień, nie na ostatnie).
+        if (pos < beats.length && B.randInt(5) < 2) S.voice('final2');
         if (pos >= beats.length) {
           box.classList.remove('redalert');
           say('KONIEC. ZACIŚNIJ POŚLADKI.', true);
@@ -503,7 +505,8 @@
           c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>${RAGE_FU}`);
           S.play('stamp'); quake();
           await sleep(T(250));
-          S.play(li % 2 ? 'sad' : 'howl');
+          // Co trzecia wywalona karta (losowo) dostaje „aua”, reszta syntezatorowy skowyt.
+          if (!(B.randInt(3) === 0 && S.voice('out'))) S.play(li % 2 ? 'sad' : 'howl');
           say(`${c.querySelector('.card-name').textContent}… ${pickOne(DEATHS)}`, true);
           await sleep(T(1100));
         }
@@ -522,7 +525,8 @@
           const near = (idx + alive.length - 1) % alive.length;
           await roulette(alive, near, 3, 650);
           say('TO TEN?!', true);
-          for (let h = 0; h < 2; h++) { S.play('heartbeat'); await sleep(T(550)); }
+          S.voice('tothen');
+          for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(550)); }
           // Kilka przeskoków między dwoma kartami, zawsze kończy na zwycięzcy.
           const hops = 1 + 2 * B.randInt(2);
           const HOP_LINES = ['A MOŻE TEN?!', 'NIE, CZEKAJ…', 'KURWA, KTÓRY?!', 'TEN!… CHYBA…', 'NIE WYTRZYMAM…'];
@@ -540,6 +544,7 @@
           }
           say(pickOne(['SZACH MAT!', 'SZACH MAT, FRAJERZE!', 'A JEDNAK CHUJA! NIE TEN! SZACH MAT!']), true);
           shout('SZACH MAT ♚');
+          S.voice('checkmate');
           S.play('stamp'); quake(true); flash();
           kabooomAt(alive[idx], 18);
           await sleep(T(700));

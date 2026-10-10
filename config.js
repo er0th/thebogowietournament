@@ -36,8 +36,14 @@ window.BOGOWIE_CONFIG = {
   //   human, dwarf, nightelf, gnome, highorder.
   SFX: {
     win: 'sfx/levelup.mp3',
-    final: ['sfx/final1.mp3', 'sfx/final2.mp3', 'sfx/final3.mp3', 'sfx/final4.mp3', 'sfx/final5.mp3', 'sfx/final6.mp3', 'sfx/final8.mp3'],
-    matchpoint: 'sfx/maczbol1.mp3',
+    final: ['sfx/final1.mp3', 'sfx/final2.mp3', 'sfx/final3.mp3', 'sfx/final4.mp3', 'sfx/final5.mp3', 'sfx/final6.mp3', 'sfx/final8.mp3',
+      'sfx/final9.mp3', 'sfx/final10.mp3', 'sfx/final11.mp3', 'sfx/final12.mp3', 'sfx/final13.mp3', 'sfx/final14.mp3', 'sfx/final15.mp3'],
+    // Reakcje na trafienia w trakcie finału (nie na wygraną).
+    final2: ['sfx/cbapelikany.mp3', 'sfx/japierdole.mp3', 'sfx/kutas.mp3', 'sfx/pedale.mp3', 'sfx/psem.mp3'],
+    matchpoint: ['sfx/maczbol1.mp3', 'sfx/maczbol2.mp3'],
+    tothen: 'sfx/tojestoo.mp3',       // „TO TEN?!” przy fałszywym finiszu
+    checkmate: 'sfx/niemoge.mp3',     // „SZACH MAT”
+    out: 'sfx/aua.mp3',               // czasem przy wywaleniu karty
     readycheck: ['sfx/readycheck.mp3', 'sfx/readycheck2.mp3'],
 
     'player:Bartas': 'sfx/bartas.mp3',
@@ -53,15 +59,15 @@ window.BOGOWIE_CONFIG = {
 
     'race:dwarf': 'sfx/dwarf1.mp3',
 
-    'class:Druid': ['sfx/druid2.mp3', 'sfx/druid3.mp3', 'sfx/feraldruid1.mp3'],
+    'class:Druid': ['sfx/druid2.mp3', 'sfx/druid3.mp3', 'sfx/feraldruid1.mp3', 'sfx/druid4.mp3'],
     'class:Hunter': ['sfx/hunter1.mp3', 'sfx/hunter2.mp3'],
     'class:Mage': ['sfx/mage1.mp3', 'sfx/mage2.mp3'],
     'class:Paladin': ['sfx/paladin1.mp3', 'sfx/paladin2.mp3', 'sfx/paladin3.mp3'],
     'class:Priest': ['sfx/priest1.mp3', 'sfx/priest2.mp3', 'sfx/priest3.mp3'],
-    'class:Rogue': ['sfx/rogue1.mp3', 'sfx/rogue2.mp3'],
+    'class:Rogue': ['sfx/rogue1.mp3', 'sfx/rogue2.mp3', 'sfx/rogue3.mp3'],
     'class:Shaman': 'sfx/shaman1.mp3',
-    'class:Warlock': ['sfx/warlock1.mp3', 'sfx/warlock2.mp3'],
-    'class:Warrior': 'sfx/warrior1.mp3',
+    'class:Warlock': ['sfx/warlock1.mp3', 'sfx/warlock2.mp3', 'sfx/warlock3.mp3'],
+    'class:Warrior': ['sfx/warrior1.mp3', 'sfx/warrior2.mp3'],
 
     'combo:tauren|Warrior': ['sfx/warriortauren1.mp3', 'sfx/warriortauren2.mp3']
   }
