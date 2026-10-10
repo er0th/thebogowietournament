@@ -25,7 +25,7 @@ window.BOGOWIE_CONFIG = {
     { nick: 'Eerion', art: 'void', tag: 'pustka' },
     { nick: 'Patryś', art: 'knaga', tag: 'wielka knaga' },
     { nick: 'Torrac', art: 'pizza', tag: 'farciarz jebany' },
-    { nick: 'Theo', photo: 'img/theo.jpg', tag: 'świeże mięso' }
+    { nick: 'Theo', photo: 'img/theo.jpg', tag: 'gangbanger' }
   ],
 
   // Dźwięki. Lista w [ ] = losuje jeden z kilku. Bez wpisu gra syntezator albo nic.
