@@ -32,7 +32,7 @@
   const RAGE_FU = '<img class="rage" src="img/rage-fu.png" alt="">';
   const RAGE_SWEET = '<img class="rage sweet" src="img/rage-sweet.png" alt="">';
 
-  const state = { entries: [], selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null, nick: null };
+  const state = { entries: [], selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null, nick: null, openPlayers: new Set() };
   try { state.nick = localStorage.getItem('bogowie:nick') || null; } catch (e) { /* ignore */ }
   const T = ms => ms;
 
@@ -899,12 +899,13 @@
   // Przykład: 10× Undead Paladin, 7× Orc Mage, 5× Undead Mage → Mage ×12 (Orc 7, Undead 5) przed Paladin ×10.
   function renderPlayers() {
     const users = {};
-    knownNicks().forEach(n => { users[B.nickKey(n)] = { name: n, n: 0, classes: {} }; });
+    knownNicks().forEach(n => { users[B.nickKey(n)] = { key: B.nickKey(n), name: n, n: 0, classes: {}, games: [] }; });
     state.entries.forEach(e => {
       const p = playerOf(e.nick);
       const k = B.nickKey(p ? p.nick : e.nick);
-      const u = users[k] = users[k] || { name: e.nick, n: 0, classes: {} };
+      const u = users[k] = users[k] || { key: k, name: e.nick, n: 0, classes: {}, games: [] };
       u.n++;
+      u.games.push(e);
       if (!e.winner_race) return;
       const c = u.classes[e.winner_class] = u.classes[e.winner_class] || { cls: e.winner_class, n: 0, last: '', races: {} };
       c.n++; if (e.t_date > c.last) c.last = e.t_date;
@@ -916,7 +917,8 @@
     if (!list.length) { $('#playersBody').innerHTML = '<p class="muted">Nikt jeszcze nie zagrał. Same cykory.</p>'; return; }
     const medals = ['gold', 'silver', 'bronze'];
     $('#playersBody').innerHTML = `<div class="players">${list.map(u => {
-      const top = Object.values(u.classes).sort(byCount).slice(0, 3).map(c => Object.assign({}, c, { raceList: Object.values(c.races).sort(byCount) }));
+      const allCls = Object.values(u.classes).sort(byCount).map(c => Object.assign({}, c, { raceList: Object.values(c.races).sort(byCount) }));
+      const top = allCls.slice(0, 3);
       const main = top[0] ? top[0].raceList[0] : null;
       const p = playerOf(u.name);
       const alias = p && p.aliases.length ? ` <span class="muted small">aka ${esc(p.aliases.join(', '))}</span>` : '';
@@ -928,8 +930,32 @@
         <header>${avatar(u.name, 64)}<div><b>${esc(u.name)}</b>${alias}<span class="muted small">${u.n ? `${u.n} ${u.n === 1 ? 'turniej' : 'turniejów'}` : 'jeszcze nie grał, cykor'}</span></div></header>
         ${main ? `<p class="main-line"><span class="muted small">Main według losu:</span> ${comboChip(main.race, top[0].cls)}</p>` : ''}
         ${top.length ? `<ol class="top3 by-class">${rows}</ol>` : '<p class="small muted">Zero wyników. Zero chwały.</p>'}
+        ${u.n ? allResults(u, allCls) : ''}
       </article>`;
     }).join('')}</div>`;
+    // Rozwinięte „Wszystkie wyniki” zostają otwarte także po automatycznym odświeżeniu danych.
+    $$('#playersBody .all-res').forEach(d => d.addEventListener('toggle', () => {
+      if (d.open) state.openPlayers.add(d.dataset.k); else state.openPlayers.delete(d.dataset.k);
+    }));
+  }
+
+  // Pełna historia gracza: wszystkie klasy z rasami i lista turniejów od najnowszego.
+  function allResults(u, allCls) {
+    const clsRows = allCls.map(c => `<li><span class="cls-name" style="--cc:${B.CLASS_COLORS[c.cls] || '#999'}"><span class="mini">${I.cls(c.cls)}</span>${esc(c.cls)}</span><span class="cnt">×${c.n}</span>
+        <div class="race-row">${c.raceList.map(r => `<span class="race-chip"><span class="mini">${I.race(r.race)}</span>${esc(raceName(r.race))} ×${r.n}</span>`).join('')}</div></li>`).join('');
+    const games = u.games.slice().sort((a, b) => b.t_date.localeCompare(a.t_date) || String(b.created_at).localeCompare(String(a.created_at))).map(e => {
+      if (e.revealed === false || !e.winner_race) {
+        return `<li><span class="date">${esc(fmtDate(e.t_date))}</span><span class="mini fac">${I.faction(e.faction)}</span><span class="pending-chip">${PENDING_TXT}</span></li>`;
+      }
+      const seq = e.result && e.result.final ? e.result.final.sequence : [];
+      const c = [0, 0, 0]; seq.forEach(x => c[x]++);
+      return `<li><span class="date">${esc(fmtDate(e.t_date))}</span><span class="mini fac">${I.faction(e.faction)}</span>${comboChip(e.winner_race, e.winner_class)}${seq.length ? `<span class="muted small">finał ${c.join(":")}</span>` : ''}</li>`;
+    }).join('');
+    return `<details class="all-res" data-k="${esc(u.key)}" ${state.openPlayers.has(u.key) ? 'open' : ''}>
+      <summary>Wszystkie wyniki (${u.n})</summary>
+      ${clsRows ? `<h5>Wszystkie klasy</h5><ul class="all-cls">${clsRows}</ul>` : ''}
+      <h5>Turniej po turnieju</h5><ul class="all-games">${games}</ul>
+    </details>`;
   }
 
   /* ---------- nawigacja i start ---------- */

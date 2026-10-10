@@ -248,6 +248,18 @@ h2.sec-title{font-family:var(--head);font-weight:400;text-transform:uppercase;fo
 .race-chip{display:inline-flex;align-items:center;gap:3px;font-size:13px;background:#fff;border:1px solid #0003;padding:1px 6px 1px 2px}
 .race-chip .ico{width:18px;height:18px}
 .race-chip.lead{font-weight:700;border:2px solid var(--ink)}
+.all-res{margin-top:12px;border-top:2px dashed #0003;padding-top:8px}
+.all-res summary{cursor:pointer;font-weight:700;color:var(--ink);list-style:none;display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:2px solid var(--ink);background:#fff;box-shadow:3px 3px 0 #000}
+.all-res summary::-webkit-details-marker{display:none}
+.all-res summary::before{content:'▸';transition:transform .15s}
+.all-res[open] summary::before{transform:rotate(90deg)}
+.all-res h5{margin:12px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:#6b5d4c}
+.all-cls,.all-games{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.all-cls li{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.all-cls .race-row{flex-basis:100%;padding-left:0}
+.all-games li{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:14px}
+.all-games .date{min-width:92px;color:#6b5d4c}
+.all-games .combo-chip{background:#fff;color:var(--ink)}
 
 /* dialog */
 dialog{border:4px solid var(--ink);background:var(--paper);color:var(--ink);padding:0;max-width:560px;width:calc(100% - 32px);box-shadow:10px 10px 0 #000}
@@ -474,12 +486,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202610110044"></script>
+<script src="config.js?v=202610110057"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202610110044"></script>
-<script src="js/icons.js?v=202610110044"></script>
-<script src="js/sfx.js?v=202610110044"></script>
-<script src="js/backend.js?v=202610110044"></script>
-<script src="js/app.js?v=202610110044"></script>
+<script src="js/core.js?v=202610110057"></script>
+<script src="js/icons.js?v=202610110057"></script>
+<script src="js/sfx.js?v=202610110057"></script>
+<script src="js/backend.js?v=202610110057"></script>
+<script src="js/app.js?v=202610110057"></script>
 </body>
 </html>
