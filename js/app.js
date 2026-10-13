@@ -525,8 +525,9 @@
           const near = (idx + alive.length - 1) % alive.length;
           await roulette(alive, near, 3, 650);
           say('TO TEN?!', true);
-          S.voice('tothen');
-          for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(550)); }
+          // Nagranie „to jest to” gra samo (bez bicia serca pod spodem); dalej jedziemy, gdy się skończy.
+          if (S.voice('tothen')) { await sleep(T(400)); await S.voiceDone(5000); }
+          else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(550)); }
           // Kilka przeskoków między dwoma kartami, zawsze kończy na zwycięzcy.
           const hops = 1 + 2 * B.randInt(2);
           const HOP_LINES = ['A MOŻE TEN?!', 'NIE, CZEKAJ…', 'KURWA, KTÓRY?!', 'TEN!… CHYBA…', 'NIE WYTRZYMAM…'];
@@ -544,8 +545,9 @@
           }
           say(pickOne(['SZACH MAT!', 'SZACH MAT, FRAJERZE!', 'A JEDNAK CHUJA! NIE TEN! SZACH MAT!']), true);
           shout('SZACH MAT ♚');
-          S.voice('checkmate');
-          S.play('stamp'); quake(true); flash();
+          // Przy głosie „nie mogę” bez dodatkowej pieczątki, żeby nie grały trzy rzeczy naraz.
+          if (!S.voice('checkmate')) S.play('stamp');
+          quake(true); flash();
           kabooomAt(alive[idx], 18);
           await sleep(T(700));
         } else {
@@ -557,9 +559,9 @@
         w.classList.add('crowned');
         w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
-        S.play('crown');
-        // Po szach macie niech „nie mogę” wybrzmi, zanim odezwie się zwycięzca.
+        // Po szach macie niech „nie mogę” wybrzmi, zanim zagra korona i odezwie się zwycięzca.
         if (fake) await S.voiceDone(2200);
+        S.play('crown');
         if (round.stage === 2) {
           const c = combos[round.i];
           // Combo → rasa → klasa: większość ras nie ma własnego głosu, więc wtedy mówi klasa.

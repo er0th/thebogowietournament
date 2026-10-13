@@ -43,7 +43,7 @@ window.BOGOWIE_CONFIG = {
     matchpoint: ['sfx/maczbol1.mp3', 'sfx/maczbol2.mp3'],
     tothen: 'sfx/tojestoo.mp3',       // „TO TEN?!” przy fałszywym finiszu
     checkmate: 'sfx/niemoge.mp3',     // „SZACH MAT”
-    out: 'sfx/aua.mp3',               // czasem przy wywaleniu karty
+    out: ['sfx/aua.mp3', 'sfx/nienie.mp3'], // czasem przy wywaleniu karty
     readycheck: ['sfx/readycheck.mp3', 'sfx/readycheck2.mp3'],
 
     'player:Bartas': 'sfx/bartas.mp3',
