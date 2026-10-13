@@ -494,6 +494,8 @@
         say(n === 1 ? 'Jeden kandydat na krzyż. Zero wyboru, zero litości.' : n <= 3 ? 'Mało ich, nikt nie odpada. Ale wygra tylko jeden.' : 'No to mamy kandydatów. Ktoś zaraz odpadnie.');
       } else if (b.phase === 'cut') {
         const losers = $$('.card', area).filter(c => !round.data.advancing.includes(c.dataset.v));
+        // Najwyżej jedno nagranie („aua” / „nie nie”) na całe wywalanie w tej rundzie.
+        const voiceAt = B.randInt(3) === 0 ? B.randInt(losers.length) : -1;
         for (let li = 0; li < losers.length; li++) {
           say(pickOne(LINES.cut));
           const alive = $$('.card', area).filter(c => !c.classList.contains('out'));
@@ -503,10 +505,10 @@
           c.classList.remove('hot');
           c.classList.add('out');
           c.insertAdjacentHTML('beforeend', `<span class="stamp stamp-in">${pickOne(STAMPS)}</span>${RAGE_FU}`);
-          S.play('stamp'); quake();
+          quake();
+          // Jeden dźwięk na wywaloną kartę: nagranie (najwyżej raz na rundę) albo pieczątka.
+          if (!(li === voiceAt && S.voice('out', { soft: true }))) S.play('stamp');
           await sleep(T(250));
-          // Co trzecia wywalona karta (losowo) dostaje „aua”, reszta syntezatorowy skowyt.
-          if (!(B.randInt(3) === 0 && S.voice('out', { soft: true }))) S.play(li % 2 ? 'sad' : 'howl');
           say(`${c.querySelector('.card-name').textContent}… ${pickOne(DEATHS)}`, true);
           await sleep(T(1100));
         }
@@ -525,8 +527,9 @@
           const near = (idx + alive.length - 1) % alive.length;
           await roulette(alive, near, 3, 650);
           say('TO TEN?!', true);
-          // Nagranie „to jest to” gra samo (bez bicia serca pod spodem); dalej jedziemy, gdy się skończy.
-          if (S.voice('tothen')) { await sleep(T(400)); await S.voiceDone(5000); }
+          // Przy fałszywym finiszu gra JEDNO nagranie: albo „to jest to” teraz, albo „nie mogę” przy szach macie.
+          const fakeVoice = B.randInt(2) === 0 ? 'tothen' : 'checkmate';
+          if (fakeVoice === 'tothen' && S.voice('tothen')) { await sleep(T(400)); await S.voiceDone(5000); }
           else for (let h = 0; h < 3; h++) { S.play('heartbeat'); await sleep(T(550)); }
           // Kilka przeskoków między dwoma kartami, zawsze kończy na zwycięzcy.
           const hops = 1 + 2 * B.randInt(2);
@@ -545,8 +548,7 @@
           }
           say(pickOne(['SZACH MAT!', 'SZACH MAT, FRAJERZE!', 'A JEDNAK CHUJA! NIE TEN! SZACH MAT!']), true);
           shout('SZACH MAT ♚');
-          // Przy głosie „nie mogę” bez dodatkowej pieczątki, żeby nie grały trzy rzeczy naraz.
-          if (!S.voice('checkmate')) S.play('stamp');
+          if (!(fakeVoice === 'checkmate' && S.voice('checkmate'))) S.play('stamp');
           quake(true); flash();
           kabooomAt(alive[idx], 18);
           await sleep(T(700));
@@ -560,13 +562,15 @@
         w.insertAdjacentHTML('beforeend', `<span class="crown-tag">WYBRANIEC</span>${RAGE_SWEET}`);
         flash();
         // Po szach macie niech „nie mogę” wybrzmi, zanim zagra korona i odezwie się zwycięzca.
-        if (fake) await S.voiceDone(2200);
-        S.play('crown');
-        if (round.stage === 2) {
-          const c = combos[round.i];
-          // Combo → rasa → klasa: większość ras nie ma własnego głosu, więc wtedy mówi klasa.
-          S.voice(`combo:${c.race}|${c.cls}`) || S.voice('race:' + c.race) || S.voice('class:' + c.cls);
-        } else S.voice((round.kind === 'class' ? 'class:' : 'race:') + round.data.winner);
+        // Po fałszywym finiszu wystarczy już dźwięków: bez korony i bez głosu klasy.
+        // Normalnie: korona i głos z biblioteki (combo → rasa → klasa).
+        if (!fake) {
+          S.play('crown');
+          if (round.stage === 2) {
+            const c = combos[round.i];
+            S.voice(`combo:${c.race}|${c.cls}`) || S.voice('race:' + c.race) || S.voice('class:' + c.cls);
+          } else S.voice((round.kind === 'class' ? 'class:' : 'race:') + round.data.winner);
+        }
         say(`${w.querySelector('.card-name').textContent}! Jedni się cieszą, reszta płacze w poduszkę.`, true);
       }
       pos++;
