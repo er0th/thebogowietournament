@@ -1,0 +1,21 @@
+# Codzienne lekkie zapytanie do Supabase, żeby darmowy projekt nie został uśpiony po tygodniu bez ruchu.
+# Czyta tylko 1 wiersz z publicznego widoku, tym samym kluczem publicznym co strona.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 6 * * *'   # codziennie ok. 8:17 czasu polskiego
+  workflow_dispatch: {}     # można też odpalić ręcznie z zakładki Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zapytanie do bazy
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://oitzaipjhzbmvijngorp.supabase.co/rest/v1/entries_public?select=id&limit=1" \
+            -H "apikey: sb_publishable_kjk79GonWnCWaiyJTJS3hw_yz08AkCJ" \
+            -H "Authorization: Bearer sb_publishable_kjk79GonWnCWaiyJTJS3hw_yz08AkCJ")
+          echo "Supabase odpowiedział: $code"
+          test "$code" = "200"
