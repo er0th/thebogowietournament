@@ -7,7 +7,7 @@ window.BOGOWIE_CONFIG = {
 
   // Okno eventu (czas polski). Muszą się zgadzać z supabase/schema.sql.
   EVENT_START: '2026-10-08',
-  EVENT_END: '2026-11-03',
+  EVENT_END: '2026-11-04',
 
   // Finał Bo7: wygrywa combo, które pierwsze trafi tyle razy. Musi się zgadzać z schema.sql.
   FINAL_TARGET: 4,

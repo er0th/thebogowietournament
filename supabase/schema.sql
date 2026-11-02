@@ -19,7 +19,7 @@ drop function if exists public.start_tournament(text, text, date);
 
 -- ---------- ustawienia eventu ----------
 create or replace function public.event_start()  returns date language sql immutable as $$ select date '2026-10-08' $$;
-create or replace function public.event_end()    returns date language sql immutable as $$ select date '2026-11-03' $$;
+create or replace function public.event_end()    returns date language sql immutable as $$ select date '2026-11-04' $$;
 create or replace function public.final_target() returns int  language sql immutable as $$ select 4 $$;  -- Bo7
 
 -- ---------- roster WoW: Forever ----------
