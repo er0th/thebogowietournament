@@ -214,7 +214,11 @@ begin
     delete from public.characters where lower(nick) = lower(v_nick) and slot = p_slot;
     return;
   end if;
-  if char_length(v_name) > 24 or v_name ~ '[[:cntrl:]<>"`]' then raise exception 'Złe imię postaci.'; end if;
+  -- Imię dwuczłonowe: dwa słowa po 2–12 liter (np. Thrall Durotan).
+  v_name := regexp_replace(v_name, '\s+', ' ', 'g');
+  if v_name !~ '^[[:alpha:]]{2,12} [[:alpha:]]{2,12}$' then
+    raise exception 'Imię ma być dwuczłonowe, np. Thrall Durotan. Same litery.';
+  end if;
   if not exists (select 1 from public.combos where race_id = p_race and class = p_class) then
     raise exception 'Ta rasa nie gra tą klasą w WoW: Forever.';
   end if;

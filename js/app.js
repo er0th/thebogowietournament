@@ -1001,10 +1001,10 @@
     const opt = (v, label, sel) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(label)}</option>`;
     const races = ['Horde', 'Alliance'].map(f => `<optgroup label="${B.FACTION_PL[f]}">${B.racesOf(f).map(r => opt(r.id, r.name, c.race_id)).join('')}</optgroup>`).join('');
     const id = `cf-${slot}`;
-    return `<form class="char-slot char-form" data-slot="${slot}" novalidate>
-      <h4>${SLOT_PL[slot]}</h4>
-      <label for="${id}-name">Name</label>
-      <input id="${id}-name" class="input" name="name" maxlength="24" value="${esc(c.name || '')}" placeholder="imię postaci w grze">
+    return `<fieldset class="char-slot char-form" data-slot="${slot}">
+      <h4>${SLOT_PL[slot]}${slot === 'alt' ? ' <span class="muted small">(opcjonalnie)</span>' : ''}</h4>
+      <label for="${id}-name">Name <span class="muted small">(imię i nazwisko)</span></label>
+      <input id="${id}-name" class="input" name="name" maxlength="25" value="${esc(c.name || '')}" placeholder="np. Thrall Durotan" autocomplete="off">
       <label for="${id}-race">Race</label>
       <select id="${id}-race" class="input" name="race_id"><option value="">— wybierz —</option>${races}</select>
       <label for="${id}-class">Klasa</label>
@@ -1013,11 +1013,15 @@
       <select id="${id}-p1" class="input" name="prof1"></select>
       <label for="${id}-p2">Profesja</label>
       <select id="${id}-p2" class="input" name="prof2"></select>
-      <div class="go-row">
-        <button type="submit" class="btn">Zapisz ${SLOT_PL[slot].toLowerCase()}a</button>
-        ${charOf(nick, slot) ? `<button type="button" class="btn btn-ghost btn-sm" data-clear>Usuń</button>` : ''}
-      </div>
-    </form>`;
+      <div class="go-row"><button type="button" class="btn btn-ghost btn-sm" data-clear>Wyczyść</button></div>
+    </fieldset>`;
+  }
+
+  // Imię dwuczłonowe: dwa słowa po 2–12 liter, każde z wielkiej litery. Zwraca null, jak się nie da.
+  function cleanCharName(raw) {
+    const parts = String(raw || '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length !== 2 || !parts.every(w => /^\p{L}{2,12}$/u.test(w))) return null;
+    return parts.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
   }
 
   // Lista klas zależy od rasy, druga profesja nie może być taka sama jak pierwsza.
@@ -1082,49 +1086,74 @@
       const editing = me && state.editing;
       return `<article class="char-card${me ? ' me' : ''}">
         <header>${avatar(name, 48)}<b>${esc(name)}</b>${me ? `<button type="button" class="btn btn-sm ${editing ? 'btn-ghost' : ''}" id="charEdit">${editing ? 'Zamknij' : 'Edytuj'}</button>` : ''}</header>
-        <div class="char-slots">${['main', 'alt'].map(sl => editing ? charForm(name, sl) : charView(charOf(name, sl), sl)).join('')}</div>
+        ${editing ? `<form id="charsForm" novalidate><div class="char-slots">${['main', 'alt'].map(sl => charForm(name, sl)).join('')}</div>
+          <div class="go-row save-row"><button type="submit" class="btn btn-big">Zapisz postacie</button></div></form>`
+        : `<div class="char-slots">${['main', 'alt'].map(sl => charView(charOf(name, sl), sl)).join('')}</div>`}
       </article>`;
     }).join('')}</div>`;
     const btn = $('#charEdit');
     if (btn) btn.addEventListener('click', () => { state.editing = !state.editing; renderChars(); });
-    $$('#charsBody .char-form').forEach(f => {
+    const form = $('#charsForm');
+    if (!form) return;
+    $$('.char-form', form).forEach(f => {
       wireCharForm(f, charOf(state.nick, f.dataset.slot));
-      f.addEventListener('submit', ev => { ev.preventDefault(); submitChar(f); });
-      const clr = $('[data-clear]', f);
-      if (clr) clr.addEventListener('click', () => saveChar({ nick: myName(), slot: f.dataset.slot }));
+      $('[data-clear]', f).addEventListener('click', () => {
+        f.elements.name.value = ''; f.elements.race_id.value = ''; f.elements.prof1.value = ''; f.elements.prof2.value = '';
+        f.elements.race_id.dispatchEvent(new Event('change')); f.elements.prof1.dispatchEvent(new Event('change'));
+      });
     });
+    form.addEventListener('submit', ev => { ev.preventDefault(); submitChars(form); });
   }
   const myName = () => { const p = playerOf(state.nick); return p ? p.nick : state.nick; };
 
-  function submitChar(f) {
-    const el = f.elements;
-    const c = { nick: myName(), slot: f.dataset.slot, name: el.name.value.trim(), race_id: el.race_id.value, class: el.class.value, prof1: el.prof1.value, prof2: el.prof2.value };
-    if (!c.race_id || !c.class) { toast('Rasa i klasa, geniuszu. Bez tego nie ma postaci.', true); return; }
-    const prev = charOf(c.nick, c.slot);
+  // Jeden przycisk zapisuje main i alta naraz. Pusty slot = brak postaci (usuwa, jeśli była).
+  function submitChars(form) {
+    const list = [];
+    for (const f of $$('.char-form', form)) {
+      const el = f.elements, slot = f.dataset.slot, label = SLOT_PL[slot];
+      const c = { nick: myName(), slot, name: el.name.value.trim(), race_id: el.race_id.value, class: el.class.value, prof1: el.prof1.value, prof2: el.prof2.value };
+      const empty = !c.name && !c.race_id && !c.class && !c.prof1 && !c.prof2;
+      if (empty) {
+        if (slot === 'main') { toast('Bez maina ani rusz. Wpisz chociaż jego.', true); el.name.focus(); return; }
+        if (charOf(c.nick, slot)) list.push({ nick: c.nick, slot });
+        continue;
+      }
+      const name = cleanCharName(c.name);
+      if (!name) { toast(`${label}: imię ma być dwuczłonowe, np. Thrall Durotan. Same litery.`, true); el.name.focus(); return; }
+      c.name = name; el.name.value = name;
+      if (!c.race_id || !c.class) { toast(`${label}: rasa i klasa, geniuszu. Bez tego nie ma postaci.`, true); (c.race_id ? el.class : el.race_id).focus(); return; }
+      list.push(c);
+    }
+    const main = list.find(c => c.slot === 'main' && c.class);
+    const prev = main && charOf(main.nick, 'main');
     // Pstryczek w nos: przy wpisywaniu (albo zmianie) klasy maina.
-    if (c.slot === 'main' && (!prev || prev.class !== c.class)) { askRollCheck(c); return; }
-    saveChar(c);
+    if (main && (!prev || prev.class !== main.class)) { askRollCheck(list, main); return; }
+    saveChars(list);
   }
 
-  function askRollCheck(c) {
+  function askRollCheck(list, main) {
     const d = $('#rollDialog');
-    d._char = c;
-    $('#rollWhat').innerHTML = comboChip(c.race_id, c.class);
+    d._chars = list;
+    $('#rollWhat').innerHTML = comboChip(main.race_id, main.class);
     S.voice('tothen');
     d.showModal();
   }
 
-  async function saveChar(c) {
+  async function saveChars(list) {
+    if (!list.length) { state.editing = false; renderChars(); return; }
     try {
-      await api.saveCharacter(c);
+      for (const c of list) await api.saveCharacter(c);
       state.chars = await api.listCharacters();
-      const fate = c.slot === 'main' && c.class ? fateClass(c.nick) : null;
-      if (c.slot === 'main' && c.class && fate) toast(fate === c.class ? 'Zgadza się z losem. Rzadki okaz uczciwości.' : 'Zapisane. Bogowie widzą wszystko. 👀');
-      else toast(c.class ? 'Zapisane.' : 'Usunięte.');
+      const main = list.find(c => c.slot === 'main' && c.class);
+      const fate = main ? fateClass(main.nick) : null;
+      toast(main && fate ? (fate === main.class ? 'Zapisane. Zgadza się z losem, rzadki okaz uczciwości.' : 'Zapisane. Bogowie widzą wszystko. 👀') : 'Zapisane.');
       S.play('stamp');
       state.editing = false;
       renderChars();
-    } catch (e) { toast(e.message, true); }
+    } catch (e) {
+      try { state.chars = await api.listCharacters(); } catch (e2) { /* ignore */ }
+      toast(e.message, true);
+    }
   }
 
   /* ---------- nawigacja i start ---------- */
@@ -1159,7 +1188,7 @@
     $('#warnCancel').addEventListener('click', () => $('#warnDialog').close());
     $('#warnGo').addEventListener('click', confirmStart);
     $('#rollNo').addEventListener('click', () => { $('#rollDialog').close(); S.play('sad'); });
-    $('#rollYes').addEventListener('click', () => { const d = $('#rollDialog'); d.close(); saveChar(d._char); });
+    $('#rollYes').addEventListener('click', () => { const d = $('#rollDialog'); d.close(); saveChars(d._chars || []); });
     try {
       state.entries = await api.listEntries();
     } catch (e) {
