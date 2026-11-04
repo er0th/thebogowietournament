@@ -986,9 +986,9 @@
   }
 
   function charView(c, slot) {
-    if (!c) return `<div class="char-slot empty"><h4>${SLOT_PL[slot]}</h4><p class="muted small">${slot === 'main' ? 'Jeszcze nie wpisał. Pewnie dalej płacze po rollu.' : 'Brak alta. Monogamista.'}</p></div>`;
+    if (!c) return `<div class="char-slot ${slot} empty"><h4>${SLOT_PL[slot]}</h4><p class="muted small">${slot === 'main' ? 'Jeszcze nie wpisał. Pewnie dalej płacze po rollu.' : 'Brak alta. Monogamista.'}</p></div>`;
     const profs = [c.prof1, c.prof2].filter(Boolean);
-    return `<div class="char-slot" style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">
+    return `<div class="char-slot ${slot}" style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">
       <h4>${SLOT_PL[slot]}</h4>
       <p class="char-name">${c.name ? esc(c.name) : '<span class="muted">bez imienia</span>'}</p>
       <p>${comboChip(c.race_id, c.class)} <span class="mini fac">${I.faction(B.RACE_BY_ID[c.race_id] ? B.RACE_BY_ID[c.race_id].faction : 'Horde')}</span></p>
@@ -1002,7 +1002,7 @@
     const opt = (v, label, sel) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(label)}</option>`;
     const races = ['Horde', 'Alliance'].map(f => `<optgroup label="${B.FACTION_PL[f]}">${B.racesOf(f).map(r => opt(r.id, r.name, c.race_id)).join('')}</optgroup>`).join('');
     const id = `cf-${slot}`;
-    return `<fieldset class="char-slot char-form" data-slot="${slot}">
+    return `<fieldset class="char-slot char-form ${slot}" data-slot="${slot}">
       <h4>${SLOT_PL[slot]}${slot === 'alt' ? ' <span class="muted small">(opcjonalnie)</span>' : ''}</h4>
       <label for="${id}-name">Name <span class="muted small">(imię i nazwisko)</span></label>
       <input id="${id}-name" class="input" name="name" maxlength="25" value="${esc(c.name || '')}" placeholder="np. Thrall Durotan" autocomplete="off">
@@ -1080,8 +1080,9 @@
           `<li style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">${avatar(c.nick, 24)}<b>${esc(c.nick)}</b><span class="mini fac">${I.faction(fac(c))}</span><span class="loc-char">${esc(c.name || '')}</span><span class="muted small">${esc(raceName(c.race_id))} ${esc(c.class)}</span></li>`).join('');
         return `<div class="loc">${I.loc(l.st.sub)}<h4>${esc(l.st.sub)} <span class="muted small">${esc(l.st.zone)}</span><span class="cnt">×${l.list.length}</span></h4><ul>${people}</ul></div>`;
       }).join('');
-      return `<h4 class="loc-head"><span class="slot-tag ${slot}">${SLOT_PL[slot]}y</span></h4>` +
-        (tiles ? `<div class="loc-grid">${tiles}</div>` : `<p class="muted small">${slot === 'alt' ? 'Nikt jeszcze nie wpisał alta.' : 'Nikt jeszcze nie wpisał maina.'}</p>`);
+      const n = state.chars.filter(c => c.slot === slot).length;
+      return `<section class="loc-group ${slot}"><header class="loc-group-head"><span>${slot === 'main' ? 'Mainy' : 'Alty'}</span><span class="loc-group-n">${n} ${n === 1 ? 'postać' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 'postacie' : 'postaci'}</span></header>` +
+        (tiles ? `<div class="loc-grid">${tiles}</div>` : `<p class="muted small">${slot === 'alt' ? 'Nikt jeszcze nie wpisał alta.' : 'Nikt jeszcze nie wpisał maina.'}</p>`) + '</section>';
     }
     return `<div class="chars-sum">
       <div class="panel locs"><h3>Gdzie startujemy</h3><p class="muted small">Lokacja startowa według rasy.</p>${locTiles('main')}${locTiles('alt')}</div>

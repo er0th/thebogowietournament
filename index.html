@@ -376,7 +376,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .char-card header b{font-family:var(--head);font-weight:400;font-size:24px;text-transform:uppercase;letter-spacing:.02em;flex:1}
 .char-slots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .char-slot{border-left:4px solid var(--cc,var(--line));padding:4px 0 4px 12px;min-width:0}
-.char-slot h4{margin:0 0 6px;font-family:var(--head);font-weight:400;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-size:16px}
+.char-slot h4{margin:0 0 8px;font-family:var(--head);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:15px;display:inline-block;padding:3px 10px;line-height:1.1}
+.char-slot.main h4{background:var(--gold);color:var(--ink)}
+.char-slot.alt h4{background:#5f86c9;color:#fff}
+.char-slot.alt{background:rgba(59,111,224,.06)}
+.char-slot.main{background:rgba(242,194,48,.05)}
+.char-slot.alt h4 .muted{color:#e6eefc}
 .char-slot p{margin:6px 0}
 .char-name{font-weight:700;font-size:18px;overflow-wrap:anywhere}
 .profs{display:flex;flex-wrap:wrap;gap:6px}
@@ -398,8 +403,13 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .loc ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .loc li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-left:4px solid var(--cc);padding-left:8px}
 .loc-char{font-weight:600}
-.loc-head{margin:16px 0 8px}
-.loc-head .slot-tag{font-size:14px;padding:3px 10px}
+.loc-group{margin-top:18px;border:3px solid var(--gc);background:var(--gb);box-shadow:5px 5px 0 #000}
+.loc-group.main{--gc:var(--gold);--gb:rgba(242,194,48,.07);--gt:var(--ink)}
+.loc-group.alt{--gc:#5f86c9;--gb:rgba(59,111,224,.08);--gt:#fff}
+.loc-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;background:var(--gc);color:var(--gt);padding:8px 14px;font-family:var(--head);text-transform:uppercase;letter-spacing:.05em;font-size:26px;line-height:1}
+.loc-group-n{font-family:var(--body);font-size:14px;letter-spacing:0;text-transform:none;font-weight:600}
+.loc-group .loc-grid,.loc-group>p{padding:12px;margin:0}
+.loc-group .loc{background:var(--panel)}
 .slot-tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border:2px solid var(--line)}
 .slot-tag.main{background:var(--gold);color:var(--ink);border-color:var(--gold)}
 .sum-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
@@ -553,12 +563,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611041349"></script>
+<script src="config.js?v=202611041411"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611041349"></script>
-<script src="js/icons.js?v=202611041349"></script>
-<script src="js/sfx.js?v=202611041349"></script>
-<script src="js/backend.js?v=202611041349"></script>
-<script src="js/app.js?v=202611041349"></script>
+<script src="js/core.js?v=202611041411"></script>
+<script src="js/icons.js?v=202611041411"></script>
+<script src="js/sfx.js?v=202611041411"></script>
+<script src="js/backend.js?v=202611041411"></script>
+<script src="js/app.js?v=202611041411"></script>
 </body>
 </html>
