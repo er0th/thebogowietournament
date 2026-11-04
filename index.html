@@ -385,6 +385,15 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .char-form .input{width:100%;margin:2px 0}
 .char-form select.input:disabled{opacity:.5}
 .char-form .go-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.chars-sum{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:8px}
+.chars-sum .panel{margin:0 0 10px}
+.sum-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+.sum-list li{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:5px 8px;border-left:4px solid var(--cc,var(--line));background:var(--bg2)}
+.chars-sum .panel:last-child .sum-list li{grid-template-columns:1fr auto}
+.sum-list li b{font-family:var(--head);font-weight:400;font-size:22px;min-width:1.5em;text-align:right}
+.sum-list li.zero{opacity:.4}
+.sum-name{overflow-wrap:anywhere}
+@media (max-width:700px){.chars-sum{grid-template-columns:1fr}}
 #rollDialog .big-warn{font-size:22px;line-height:1.2}
 @media (max-width:860px){.nav .nav-top{width:calc((100% - 14px) / 2)}}
 @media (max-width:560px){.char-slots{grid-template-columns:1fr}}
@@ -527,12 +536,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611041328"></script>
+<script src="config.js?v=202611041332"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611041328"></script>
-<script src="js/icons.js?v=202611041328"></script>
-<script src="js/sfx.js?v=202611041328"></script>
-<script src="js/backend.js?v=202611041328"></script>
-<script src="js/app.js?v=202611041328"></script>
+<script src="js/core.js?v=202611041332"></script>
+<script src="js/icons.js?v=202611041332"></script>
+<script src="js/sfx.js?v=202611041332"></script>
+<script src="js/backend.js?v=202611041332"></script>
+<script src="js/app.js?v=202611041332"></script>
 </body>
 </html>

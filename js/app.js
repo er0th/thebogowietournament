@@ -1044,6 +1044,29 @@
     p2.addEventListener('change', syncProfs);
   }
 
+  // Podsumowanie nad kartami: ile postaci każdej klasy (main/alt) i ile każdej profesji. Zera też, żeby widać było dziury.
+  function charsSummary() {
+    if (!state.chars.length) return '';
+    const cls = {}, prof = {};
+    state.chars.forEach(c => {
+      const k = cls[c.class] = cls[c.class] || { main: 0, alt: 0 };
+      k[c.slot]++;
+      [c.prof1, c.prof2].filter(Boolean).forEach(x => { prof[x] = (prof[x] || 0) + 1; });
+    });
+    const tot = k => (cls[k] ? cls[k].main + cls[k].alt : 0);
+    const clsRows = B.CLASSES.slice().sort((a, b) => tot(b) - tot(a) || a.localeCompare(b)).map(k => {
+      const v = cls[k] || { main: 0, alt: 0 };
+      return `<li class="${tot(k) ? '' : 'zero'}" style="--cc:${B.CLASS_COLORS[k]}"><span class="mini">${I.cls(k)}</span><span class="sum-name">${esc(k)}</span><b>${tot(k)}</b><span class="muted small">${v.main} main · ${v.alt} alt</span></li>`;
+    }).join('');
+    const profRows = B.PROFESSIONS.slice().sort((a, b) => (prof[b] || 0) - (prof[a] || 0) || a.localeCompare(b)).map(k =>
+      `<li class="${prof[k] ? '' : 'zero'}"><span class="sum-name">${esc(k)}</span><b>${prof[k] || 0}</b></li>`).join('');
+    const mains = state.chars.filter(c => c.slot === 'main').length, alts = state.chars.length - mains;
+    return `<div class="chars-sum">
+      <div class="panel"><h3>Klasy</h3><p class="muted small">Main: ${mains} · Alt: ${alts}</p><ul class="sum-list">${clsRows}</ul></div>
+      <div class="panel"><h3>Profesje</h3><p class="muted small">Main i alt razem</p><ul class="sum-list">${profRows}</ul></div>
+    </div>`;
+  }
+
   function renderChars() {
     const body = $('#charsBody');
     if (!body) return;
@@ -1052,7 +1075,7 @@
     const mine = nicks.filter(isMe), rest = nicks.filter(n => !isMe(n));
     const list = mine.concat(rest);
     const hint = state.nick ? '' : '<p class="muted">Żeby wpisać swoje postacie, wybierz swoją mordę na <a href="#start">ekranie startowym</a>.</p>';
-    body.innerHTML = hint + `<div class="chars">${list.map(n => {
+    body.innerHTML = hint + charsSummary() + `<div class="chars">${list.map(n => {
       const p = playerOf(n);
       const name = p ? p.nick : n;
       const me = isMe(name);
