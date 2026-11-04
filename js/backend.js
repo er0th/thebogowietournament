@@ -31,6 +31,7 @@
 
   function demoBackend() {
     const KEY = 'bogowie:demo:entries';
+    const CKEY = 'bogowie:demo:characters';
     const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
     const write = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* ignore */ } };
     const mask = e => (e.revealed ? e : Object.assign({}, e, { result: null, winner_race: null, winner_class: null }));
@@ -55,6 +56,16 @@
       },
       async reveal(id, token) {
         write(read().map(e => (e.id === id && e.reveal_token === token ? Object.assign(e, { revealed: true }) : e)));
+      },
+      async listCharacters() { try { return JSON.parse(localStorage.getItem(CKEY)) || []; } catch (e) { return []; } },
+      async saveCharacter(c) {
+        let list = await this.listCharacters();
+        list = list.filter(x => !(nickKey(x.nick) === nickKey(c.nick) && x.slot === c.slot));
+        if (c.race_id || c.class || c.name) {
+          if (!B.RACE_BY_ID[c.race_id] || !B.RACE_BY_ID[c.race_id].classes.includes(c.class)) throw new Error('Ta rasa nie gra tą klasą w WoW: Forever.');
+          list.push(Object.assign({}, c, { updated_at: new Date().toISOString() }));
+        }
+        try { localStorage.setItem(CKEY, JSON.stringify(list)); } catch (e) { /* ignore */ }
       }
     };
   }
@@ -79,6 +90,18 @@
       },
       async reveal(id, token) {
         const { error } = await sb.rpc('reveal_entry', { p_id: id, p_token: token });
+        fail(error);
+      },
+      async listCharacters() {
+        const { data, error } = await sb.from('characters').select('nick,slot,name,race_id,class,prof1,prof2,updated_at');
+        fail(error);
+        return data || [];
+      },
+      async saveCharacter(c) {
+        const { error } = await sb.rpc('save_character', {
+          p_nick: c.nick, p_slot: c.slot, p_name: c.name || '', p_race: c.race_id || '', p_class: c.class || '',
+          p_prof1: c.prof1 || null, p_prof2: c.prof2 || null
+        });
         fail(error);
       }
     };

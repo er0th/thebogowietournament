@@ -57,8 +57,8 @@ header.top{padding:28px 0 10px}
 
 /* nav */
 .nav{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 8px;position:sticky;top:0;z-index:20;padding:10px 0;background:linear-gradient(var(--bg) 70%,transparent)}
-.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.nav a{font-family:var(--head);text-transform:uppercase;text-decoration:none;color:var(--text);padding:16px 18px;border:4px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);letter-spacing:.04em;font-size:clamp(22px,2.8vw,34px);text-align:center;line-height:1;transition:transform .12s,background .12s}
+.nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.nav a{font-family:var(--head);text-transform:uppercase;text-decoration:none;color:var(--text);padding:16px 18px;border:4px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);letter-spacing:.04em;font-size:clamp(18px,2.4vw,30px);text-align:center;line-height:1;transition:transform .12s,background .12s}
 .nav a[aria-current=page]{background:var(--gold);color:var(--ink);transform:rotate(-2deg) scale(1.03)}
 .nav a:hover{border-color:var(--gold);transform:translateY(-2px)}
 .nav a[aria-current=page]:hover{transform:rotate(-2deg) scale(1.05)}
@@ -366,6 +366,27 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   .cards.many .card-ico .ico{width:48px;height:48px}
   .cards.many .card-name{font-size:13px}
 }
+
+/* postacie */
+.chars{display:grid;gap:18px;grid-template-columns:repeat(auto-fill,minmax(min(100%,460px),1fr))}
+.char-card{background:var(--panel);border:3px solid var(--ink);box-shadow:6px 6px 0 #000;padding:16px}
+.char-card.me{border-color:var(--gold)}
+.char-card header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.char-card header b{font-family:var(--head);font-weight:400;font-size:24px;text-transform:uppercase;letter-spacing:.02em;flex:1}
+.char-slots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.char-slot{border-left:4px solid var(--cc,var(--line));padding:4px 0 4px 12px;min-width:0}
+.char-slot h4{margin:0 0 6px;font-family:var(--head);font-weight:400;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-size:16px}
+.char-slot p{margin:6px 0}
+.char-name{font-weight:700;font-size:18px;overflow-wrap:anywhere}
+.profs{display:flex;flex-wrap:wrap;gap:6px}
+.prof-chip{display:inline-block;padding:2px 8px;border:2px solid var(--line);background:var(--bg2);font-size:13px}
+.char-form label{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+.char-form .input{width:100%;margin:2px 0}
+.char-form select.input:disabled{opacity:.5}
+.char-form .go-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+#rollDialog .big-warn{font-size:22px;line-height:1.2}
+@media (max-width:860px){.nav a:last-child{grid-column:span 2}}
+@media (max-width:560px){.char-slots{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
@@ -415,6 +436,7 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       <a href="#random">Randomizer</a>
       <a href="#turniej">Turniej</a>
       <a href="#gracze">Gracze</a>
+      <a href="#postacie">Postacie</a>
       <a href="#kalendarz">Kalendarz</a>
     </nav>
 
@@ -454,6 +476,11 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       <p class="sec-lead">Ulubione combo losu u każdego z was. Im dłużej trwa event, tym śmieszniej się dubluje.</p>
       <div id="playersBody"></div>
     </section>
+    <section class="sec" id="sec-postacie" aria-labelledby="h-postacie" hidden>
+      <h2 class="sec-title" id="h-postacie">Kto czym gra</h2>
+      <p class="sec-lead">Rolle się skończyły, teraz prawda. Każdy wpisuje sam swojego maina i alta. Bez rolli, bez dramy, bez porównywania siusiaków.</p>
+      <div id="charsBody"></div>
+    </section>
     <section class="sec" id="sec-kalendarz" aria-labelledby="h-kal" hidden>
       <h2 class="sec-title" id="h-kal">Kalendarz wyników</h2>
       <p class="sec-lead">Kto, kiedy i co wylosował. Widzi każdy, wstydzi się tylko zainteresowany.</p>
@@ -486,12 +513,25 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611022024"></script>
+<dialog id="rollDialog" aria-labelledby="rollTitle">
+  <div class="dlg-head" id="rollTitle">Chwila, kurwa</div>
+  <div class="dlg-body">
+    <p class="big-warn">CZY TO NA PEWNO TA SAMA KLASA CO WYROLLOWAŁEŚ KURWA? XD</p>
+    <p>Wpisujesz maina: <span id="rollWhat"></span></p>
+    <p class="muted">Bogowie pamiętają każdy roll. Kłamstwo tutaj to jak ninja loot na Onyxii.</p>
+  </div>
+  <div class="dlg-actions">
+    <button type="button" class="btn btn-ghost" id="rollNo">Dobra, poprawię</button>
+    <button type="button" class="btn btn-danger" id="rollYes">Tak, przysięgam na Bogów</button>
+  </div>
+</dialog>
+
+<script src="config.js?v=202611041326"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611022024"></script>
-<script src="js/icons.js?v=202611022024"></script>
-<script src="js/sfx.js?v=202611022024"></script>
-<script src="js/backend.js?v=202611022024"></script>
-<script src="js/app.js?v=202611022024"></script>
+<script src="js/core.js?v=202611041326"></script>
+<script src="js/icons.js?v=202611041326"></script>
+<script src="js/sfx.js?v=202611041326"></script>
+<script src="js/backend.js?v=202611041326"></script>
+<script src="js/app.js?v=202611041326"></script>
 </body>
 </html>

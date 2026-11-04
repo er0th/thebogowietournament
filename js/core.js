@@ -50,6 +50,9 @@
     Warrior: 'Drze mordę i napierdala. Proste jak cep.'
   };
 
+  // Profesje główne w WoW: Forever (bez Jewelcrafting i Inscription).
+  const PROFESSIONS = ['Alchemy', 'Blacksmithing', 'Enchanting', 'Engineering', 'Herbalism', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring'];
+
   const FACTION_PL = { Horde: 'Horda', Alliance: 'Przymierze' };
 
   // Kryptograficzna losowość + odrzucanie, żeby uniknąć faworyzowania przez modulo.
@@ -121,7 +124,7 @@
 
   window.Bogowie = window.Bogowie || {};
   Object.assign(window.Bogowie, {
-    CLASSES, CLASS_COLORS, RACES, RACE_BY_ID, RACE_MEMES, CLASS_MEMES, FACTION_PL,
+    CLASSES, CLASS_COLORS, RACES, PROFESSIONS, RACE_BY_ID, RACE_MEMES, CLASS_MEMES, FACTION_PL,
     randInt, shuffle, drawRound, racesOf, classesOf, runTournament, combosOf, winnerOf, comboLabel
   });
 })();

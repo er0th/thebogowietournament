@@ -175,3 +175,58 @@ grant execute on function public.reveal_entry(uuid, uuid) to anon, authenticated
 
 -- ---------- usuwanie wpisu (admin) ----------
 -- Supabase → Table Editor → entries → zaznacz wiersz → Delete.
+
+-- ---------- postacie (kto czym gra naprawdę, po evencie) ----------
+-- Main i alt każdego gracza: imię, rasa, klasa, dwie profesje. Czyta każdy,
+-- zapisuje się wyłącznie przez save_character (sprawdza rasę z klasą i profesje).
+create table if not exists public.characters (
+  nick       text not null check (char_length(nick) between 2 and 24 and nick !~ '[[:cntrl:]<>"`]'),
+  slot       text not null check (slot in ('main', 'alt')),
+  name       text not null default '' check (char_length(name) <= 24 and name !~ '[[:cntrl:]<>"`]'),
+  race_id    text not null,
+  class      text not null,
+  prof1      text,
+  prof2      text,
+  updated_at timestamptz not null default now()
+);
+create unique index if not exists characters_nick_slot on public.characters (lower(nick), slot);
+alter table public.characters enable row level security;
+drop policy if exists "characters are public" on public.characters;
+create policy "characters are public" on public.characters for select using (true);
+revoke all on public.characters from anon, authenticated;
+grant select on public.characters to anon, authenticated;
+
+create or replace function public.save_character(
+  p_nick text, p_slot text, p_name text, p_race text, p_class text, p_prof1 text, p_prof2 text
+) returns void language plpgsql volatile security definer set search_path = public as $$
+declare
+  profs constant text[] := array['Alchemy','Blacksmithing','Enchanting','Engineering','Herbalism',
+                                 'Leatherworking','Mining','Skinning','Tailoring'];
+  v_nick text := btrim(regexp_replace(coalesce(p_nick, ''), '\s+', ' ', 'g'));
+  v_name text := btrim(coalesce(p_name, ''));
+  v_p1 text := nullif(btrim(coalesce(p_prof1, '')), '');
+  v_p2 text := nullif(btrim(coalesce(p_prof2, '')), '');
+begin
+  if char_length(v_nick) < 2 or char_length(v_nick) > 24 then raise exception 'Zły nick.'; end if;
+  if p_slot not in ('main', 'alt') then raise exception 'Zły slot.'; end if;
+  -- Pusty formularz = usuń tę postać.
+  if coalesce(p_race, '') = '' and coalesce(p_class, '') = '' and v_name = '' then
+    delete from public.characters where lower(nick) = lower(v_nick) and slot = p_slot;
+    return;
+  end if;
+  if char_length(v_name) > 24 or v_name ~ '[[:cntrl:]<>"`]' then raise exception 'Złe imię postaci.'; end if;
+  if not exists (select 1 from public.combos where race_id = p_race and class = p_class) then
+    raise exception 'Ta rasa nie gra tą klasą w WoW: Forever.';
+  end if;
+  if (v_p1 is not null and not v_p1 = any(profs)) or (v_p2 is not null and not v_p2 = any(profs)) then
+    raise exception 'Nie ma takiej profesji.';
+  end if;
+  if v_p1 is not null and v_p1 = v_p2 then raise exception 'Dwa razy ta sama profesja? Serio?'; end if;
+  insert into public.characters (nick, slot, name, race_id, class, prof1, prof2, updated_at)
+  values (v_nick, p_slot, v_name, p_race, p_class, v_p1, v_p2, now())
+  on conflict (lower(nick), slot) do update
+    set nick = excluded.nick, name = excluded.name, race_id = excluded.race_id, class = excluded.class,
+        prof1 = excluded.prof1, prof2 = excluded.prof2, updated_at = now();
+end $$;
+revoke all on function public.save_character(text, text, text, text, text, text, text) from public, anon, authenticated;
+grant execute on function public.save_character(text, text, text, text, text, text, text) to anon, authenticated;

@@ -32,7 +32,7 @@
   const RAGE_FU = '<img class="rage" src="img/rage-fu.png" alt="">';
   const RAGE_SWEET = '<img class="rage sweet" src="img/rage-sweet.png" alt="">';
 
-  const state = { entries: [], selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null, nick: null, openPlayers: new Set() };
+  const state = { entries: [], selectedDate: null, faction: 'Horde', randFaction: 'Horde', calDay: null, nick: null, openPlayers: new Set(), chars: [], editing: null };
   try { state.nick = localStorage.getItem('bogowie:nick') || null; } catch (e) { /* ignore */ }
   const T = ms => ms;
 
@@ -712,7 +712,8 @@
   function setNick(nick) {
     state.nick = nick;
     try { nick ? localStorage.setItem('bogowie:nick', nick) : localStorage.removeItem('bogowie:nick'); } catch (e) { /* ignore */ }
-    renderTournament(); renderProfileChip(); renderLanding();
+    state.editing = false;
+    renderTournament(); renderProfileChip(); renderLanding(); renderChars();
   }
 
   function renderTournament() {
@@ -966,11 +967,148 @@
     </details>`;
   }
 
+  /* ---------- postacie: kto czym gra naprawdę ---------- */
+
+  // Wpisują sami gracze, niezależnie od rolli. Edytować można tylko swój nick (profil na tym urządzeniu).
+  const SLOT_PL = { main: 'Main', alt: 'Alt' };
+  const charOf = (nick, slot) => state.chars.find(c => sameNick(c.nick, nick) && c.slot === slot) || null;
+  const isMe = nick => !!state.nick && sameNick(state.nick, nick);
+
+  // Klasa, którą los dawał najczęściej (remis: ta wylosowana później). Tylko do pstryczka w nos.
+  function fateClass(nick) {
+    const n = {}, last = {};
+    state.entries.forEach(e => {
+      if (!e.winner_class || !sameNick(e.nick, nick)) return;
+      n[e.winner_class] = (n[e.winner_class] || 0) + 1;
+      if (!last[e.winner_class] || e.t_date > last[e.winner_class]) last[e.winner_class] = e.t_date;
+    });
+    return Object.keys(n).sort((a, b) => n[b] - n[a] || last[b].localeCompare(last[a]))[0] || null;
+  }
+
+  function charView(c, slot) {
+    if (!c) return `<div class="char-slot empty"><h4>${SLOT_PL[slot]}</h4><p class="muted small">${slot === 'main' ? 'Jeszcze nie wpisał. Pewnie dalej płacze po rollu.' : 'Brak alta. Monogamista.'}</p></div>`;
+    const profs = [c.prof1, c.prof2].filter(Boolean);
+    return `<div class="char-slot" style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">
+      <h4>${SLOT_PL[slot]}</h4>
+      <p class="char-name">${c.name ? esc(c.name) : '<span class="muted">bez imienia</span>'}</p>
+      <p>${comboChip(c.race_id, c.class)} <span class="mini fac">${I.faction(B.RACE_BY_ID[c.race_id] ? B.RACE_BY_ID[c.race_id].faction : 'Horde')}</span></p>
+      <p class="profs">${profs.length ? profs.map(x => `<span class="prof-chip">${esc(x)}</span>`).join('') : '<span class="muted small">bez profesji, czysty lump</span>'}</p>
+    </div>`;
+  }
+
+  function charForm(nick, slot) {
+    const c = charOf(nick, slot) || {};
+    const opt = (v, label, sel) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(label)}</option>`;
+    const races = ['Horde', 'Alliance'].map(f => `<optgroup label="${B.FACTION_PL[f]}">${B.racesOf(f).map(r => opt(r.id, r.name, c.race_id)).join('')}</optgroup>`).join('');
+    const id = `cf-${slot}`;
+    return `<form class="char-slot char-form" data-slot="${slot}" novalidate>
+      <h4>${SLOT_PL[slot]}</h4>
+      <label for="${id}-name">Name</label>
+      <input id="${id}-name" class="input" name="name" maxlength="24" value="${esc(c.name || '')}" placeholder="imię postaci w grze">
+      <label for="${id}-race">Race</label>
+      <select id="${id}-race" class="input" name="race_id"><option value="">— wybierz —</option>${races}</select>
+      <label for="${id}-class">Klasa</label>
+      <select id="${id}-class" class="input" name="class"></select>
+      <label for="${id}-p1">Profesja</label>
+      <select id="${id}-p1" class="input" name="prof1"></select>
+      <label for="${id}-p2">Profesja</label>
+      <select id="${id}-p2" class="input" name="prof2"></select>
+      <div class="go-row">
+        <button type="submit" class="btn">Zapisz ${SLOT_PL[slot].toLowerCase()}a</button>
+        ${charOf(nick, slot) ? `<button type="button" class="btn btn-ghost btn-sm" data-clear>Usuń</button>` : ''}
+      </div>
+    </form>`;
+  }
+
+  // Lista klas zależy od rasy, druga profesja nie może być taka sama jak pierwsza.
+  function wireCharForm(f, c) {
+    const race = f.elements.race_id, cls = f.elements.class, p1 = f.elements.prof1, p2 = f.elements.prof2;
+    const fill = (sel, values, cur, empty) => {
+      sel.innerHTML = `<option value="">${empty}</option>` + values.map(v => `<option${v === cur ? ' selected' : ''}>${esc(v)}</option>`).join('');
+    };
+    function syncClass() {
+      const r = B.RACE_BY_ID[race.value];
+      const cur = cls.value || (c && c.class);
+      fill(cls, r ? B.CLASSES.filter(x => r.classes.includes(x)) : [], r && r.classes.includes(cur) ? cur : '', r ? '— wybierz —' : 'najpierw rasa');
+      cls.disabled = !r;
+    }
+    function syncProfs() {
+      const a = p1.value || (c && c.prof1) || '', b = p2.value || (c && c.prof2) || '';
+      fill(p1, B.PROFESSIONS.filter(x => x !== b), a, '— brak —');
+      fill(p2, B.PROFESSIONS.filter(x => x !== a), b, '— brak —');
+      c = null;
+    }
+    syncClass(); syncProfs();
+    race.addEventListener('change', () => { syncClass(); S.play('tick'); });
+    p1.addEventListener('change', syncProfs);
+    p2.addEventListener('change', syncProfs);
+  }
+
+  function renderChars() {
+    const body = $('#charsBody');
+    if (!body) return;
+    const nicks = knownNicks();
+    state.chars.forEach(c => { if (!nicks.some(n => sameNick(n, c.nick))) nicks.push(c.nick); });
+    const mine = nicks.filter(isMe), rest = nicks.filter(n => !isMe(n));
+    const list = mine.concat(rest);
+    const hint = state.nick ? '' : '<p class="muted">Żeby wpisać swoje postacie, wybierz swoją mordę na <a href="#start">ekranie startowym</a>.</p>';
+    body.innerHTML = hint + `<div class="chars">${list.map(n => {
+      const p = playerOf(n);
+      const name = p ? p.nick : n;
+      const me = isMe(name);
+      const editing = me && state.editing;
+      return `<article class="char-card${me ? ' me' : ''}">
+        <header>${avatar(name, 48)}<b>${esc(name)}</b>${me ? `<button type="button" class="btn btn-sm ${editing ? 'btn-ghost' : ''}" id="charEdit">${editing ? 'Zamknij' : 'Edytuj'}</button>` : ''}</header>
+        <div class="char-slots">${['main', 'alt'].map(sl => editing ? charForm(name, sl) : charView(charOf(name, sl), sl)).join('')}</div>
+      </article>`;
+    }).join('')}</div>`;
+    const btn = $('#charEdit');
+    if (btn) btn.addEventListener('click', () => { state.editing = !state.editing; renderChars(); });
+    $$('#charsBody .char-form').forEach(f => {
+      wireCharForm(f, charOf(state.nick, f.dataset.slot));
+      f.addEventListener('submit', ev => { ev.preventDefault(); submitChar(f); });
+      const clr = $('[data-clear]', f);
+      if (clr) clr.addEventListener('click', () => saveChar({ nick: myName(), slot: f.dataset.slot }));
+    });
+  }
+  const myName = () => { const p = playerOf(state.nick); return p ? p.nick : state.nick; };
+
+  function submitChar(f) {
+    const el = f.elements;
+    const c = { nick: myName(), slot: f.dataset.slot, name: el.name.value.trim(), race_id: el.race_id.value, class: el.class.value, prof1: el.prof1.value, prof2: el.prof2.value };
+    if (!c.race_id || !c.class) { toast('Rasa i klasa, geniuszu. Bez tego nie ma postaci.', true); return; }
+    const prev = charOf(c.nick, c.slot);
+    // Pstryczek w nos: przy wpisywaniu (albo zmianie) klasy maina.
+    if (c.slot === 'main' && (!prev || prev.class !== c.class)) { askRollCheck(c); return; }
+    saveChar(c);
+  }
+
+  function askRollCheck(c) {
+    const d = $('#rollDialog');
+    d._char = c;
+    $('#rollWhat').innerHTML = comboChip(c.race_id, c.class);
+    S.voice('tothen');
+    d.showModal();
+  }
+
+  async function saveChar(c) {
+    try {
+      await api.saveCharacter(c);
+      state.chars = await api.listCharacters();
+      const fate = c.slot === 'main' && c.class ? fateClass(c.nick) : null;
+      if (c.slot === 'main' && c.class && fate) toast(fate === c.class ? 'Zgadza się z losem. Rzadki okaz uczciwości.' : 'Zapisane. Bogowie widzą wszystko. 👀');
+      else toast(c.class ? 'Zapisane.' : 'Usunięte.');
+      S.play('stamp');
+      state.editing = false;
+      renderChars();
+    } catch (e) { toast(e.message, true); }
+  }
+
   /* ---------- nawigacja i start ---------- */
 
   function route() {
     const id = (location.hash || '#start').slice(1);
-    const known = ['random', 'turniej', 'gracze', 'kalendarz'];
+    const known = ['random', 'turniej', 'gracze', 'postacie', 'kalendarz'];
     const onLanding = !known.includes(id);
     $('#landing').hidden = !onLanding;
     $('#app').hidden = onLanding;
@@ -979,7 +1117,7 @@
     window.scrollTo(0, 0);
   }
 
-  function renderAll() { renderTournament(); renderCalendar(); renderPlayers(); renderLanding(); renderProfileChip(); }
+  function renderAll() { renderTournament(); renderCalendar(); renderPlayers(); renderChars(); renderLanding(); renderProfileChip(); }
 
   async function boot() {
     document.body.dataset.faction = state.randFaction;
@@ -997,11 +1135,14 @@
     $('#warnCheck').addEventListener('change', e => { $('#warnGo').disabled = !e.target.checked; });
     $('#warnCancel').addEventListener('click', () => $('#warnDialog').close());
     $('#warnGo').addEventListener('click', confirmStart);
+    $('#rollNo').addEventListener('click', () => { $('#rollDialog').close(); S.play('sad'); });
+    $('#rollYes').addEventListener('click', () => { const d = $('#rollDialog'); d.close(); saveChar(d._char); });
     try {
       state.entries = await api.listEntries();
     } catch (e) {
       toast('Nie da się pobrać wyników: ' + e.message, true);
     }
+    try { state.chars = await api.listCharacters(); } catch (e) { /* tabela postaci to bonus */ }
     renderAll();
     startLiveRefresh();
   }
@@ -1010,11 +1151,14 @@
   // i od razu po powrocie do karty. Przerysowujemy tylko, gdy coś się zmieniło, i nie ruszamy trwającego losowania.
   function startLiveRefresh() {
     const sig = list => list.map(e => `${e.id}:${e.revealed === false ? 0 : 1}:${e.winner_race || ''}`).join(',');
-    let last = sig(state.entries), running = false;
+    const csig = list => list.map(c => `${c.nick}|${c.slot}|${c.updated_at}`).sort().join(',');
+    let last = sig(state.entries), lastC = csig(state.chars), running = false;
     async function refresh() {
       if (document.hidden || running) return;
       running = true;
       try {
+        const chars = await api.listCharacters().catch(() => state.chars);
+        if (csig(chars) !== lastC) { lastC = csig(chars); state.chars = chars; if (!state.editing) renderChars(); }
         const fresh = await api.listEntries();
         const s = sig(fresh);
         if (s === last) return;

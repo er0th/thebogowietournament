@@ -4,6 +4,7 @@ Turniej gildii **Bogowie Forever** w WoW: Forever. Los wybiera rasę, klasę i z
 
 - **Randomizer** — dla każdego, bez logowania i bez zapisu.
 - **Turniej**: gracz wybiera lub wpisuje nick (zapamiętany na urządzeniu), jeden wpis na nick dziennie, wpis nie do usunięcia (poza adminem).
+- **Postacie**: każdy sam wpisuje swojego maina i alta (imię, rasa, klasa, 2 profesje). Edytować można tylko swój profil.
 - **Kalendarz** i **Gracze** (top 3 klasy, a przy każdej rasy) — widoczne dla wszystkich. Dane odświeżają się same co kilkanaście sekund.
 
 Bez konfiguracji Supabase strona działa w **trybie demo**: wpisy turniejowe zapisują się tylko w przeglądarce.
