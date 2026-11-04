@@ -189,6 +189,8 @@ create table if not exists public.characters (
   prof2      text,
   updated_at timestamptz not null default now()
 );
+alter table public.characters add column if not exists id uuid not null default gen_random_uuid();
+do $$ begin alter table public.characters add primary key (id); exception when invalid_table_definition then null; end $$;
 create unique index if not exists characters_nick_slot on public.characters (lower(nick), slot);
 alter table public.characters enable row level security;
 drop policy if exists "characters are public" on public.characters;

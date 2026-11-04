@@ -389,6 +389,16 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .char-form .go-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 .chars-sum{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:8px}
 .chars-sum .panel{margin:0 0 10px}
+.chars-sum .locs{grid-column:1 / -1}
+.loc-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));margin-top:8px}
+.loc{background:var(--bg2);border:2px solid var(--line);padding:10px 12px}
+.loc h4{margin:0 0 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:17px}
+.loc h4 .cnt{margin-left:auto;font-family:var(--head);font-weight:400;font-size:20px;color:var(--gold)}
+.loc ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.loc li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-left:4px solid var(--cc);padding-left:8px}
+.loc-char{font-weight:600}
+.slot-tag{font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border:2px solid var(--line)}
+.slot-tag.main{background:var(--gold);color:var(--ink);border-color:var(--gold)}
 .sum-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
 .sum-list li{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:5px 8px;border-left:4px solid var(--cc,var(--line));background:var(--bg2)}
 .chars-sum .panel:last-child .sum-list li{grid-template-columns:1fr auto}
@@ -538,12 +548,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611041336"></script>
+<script src="config.js?v=202611041343"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611041336"></script>
-<script src="js/icons.js?v=202611041336"></script>
-<script src="js/sfx.js?v=202611041336"></script>
-<script src="js/backend.js?v=202611041336"></script>
-<script src="js/app.js?v=202611041336"></script>
+<script src="js/core.js?v=202611041343"></script>
+<script src="js/icons.js?v=202611041343"></script>
+<script src="js/sfx.js?v=202611041343"></script>
+<script src="js/backend.js?v=202611041343"></script>
+<script src="js/app.js?v=202611041343"></script>
 </body>
 </html>

@@ -992,6 +992,7 @@
       <h4>${SLOT_PL[slot]}</h4>
       <p class="char-name">${c.name ? esc(c.name) : '<span class="muted">bez imienia</span>'}</p>
       <p>${comboChip(c.race_id, c.class)} <span class="mini fac">${I.faction(B.RACE_BY_ID[c.race_id] ? B.RACE_BY_ID[c.race_id].faction : 'Horde')}</span></p>
+      ${B.START[c.race_id] ? `<p class="muted small">Start: ${esc(B.START[c.race_id].sub)}, ${esc(B.START[c.race_id].zone)}</p>` : ''}
       <p class="profs">${profs.length ? profs.map(x => `<span class="prof-chip">${esc(x)}</span>`).join('') : '<span class="muted small">bez profesji, czysty lump</span>'}</p>
     </div>`;
   }
@@ -1065,7 +1066,21 @@
     const profRows = B.PROFESSIONS.slice().sort((a, b) => (prof[b] || 0) - (prof[a] || 0) || a.localeCompare(b)).map(k =>
       `<li class="${prof[k] ? '' : 'zero'}"><span class="sum-name">${esc(k)}</span><b>${prof[k] || 0}</b></li>`).join('');
     const mains = state.chars.filter(c => c.slot === 'main').length, alts = state.chars.length - mains;
+    // Startowe lokacje: kto (i którą postacią) zaczyna w danym miejscu.
+    const locs = {};
+    state.chars.forEach(c => {
+      const st = B.START[c.race_id]; if (!st) return;
+      const k = st.sub + '|' + st.zone;
+      (locs[k] = locs[k] || { st, list: [] }).list.push(c);
+    });
+    const fac = c => (B.RACE_BY_ID[c.race_id] || {}).faction || 'Horde';
+    const locRows = Object.values(locs).sort((a, b) => b.list.length - a.list.length || a.st.sub.localeCompare(b.st.sub)).map(l => {
+      const people = l.list.slice().sort((a, b) => (a.slot === b.slot ? 0 : a.slot === 'main' ? -1 : 1) || a.nick.localeCompare(b.nick, 'pl')).map(c =>
+        `<li style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">${avatar(c.nick, 24)}<b>${esc(c.nick)}</b><span class="slot-tag ${c.slot}">${SLOT_PL[c.slot]}</span><span class="mini fac">${I.faction(fac(c))}</span><span class="loc-char">${esc(c.name || '')}</span><span class="muted small">${esc(raceName(c.race_id))} ${esc(c.class)}</span></li>`).join('');
+      return `<div class="loc"><h4>${esc(l.st.sub)} <span class="muted small">${esc(l.st.zone)}</span><span class="cnt">×${l.list.length}</span></h4><ul>${people}</ul></div>`;
+    }).join('');
     return `<div class="chars-sum">
+      <div class="panel locs"><h3>Gdzie startujemy</h3><p class="muted small">Lokacja startowa według rasy. Main i alt razem.</p><div class="loc-grid">${locRows}</div></div>
       <div class="panel"><h3>Klasy</h3><p class="muted small">Main: ${mains} · Alt: ${alts}</p><ul class="sum-list">${clsRows}</ul></div>
       <div class="panel"><h3>Profesje</h3><p class="muted small">Main i alt razem</p><ul class="sum-list">${profRows}</ul></div>
     </div>`;

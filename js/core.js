@@ -50,6 +50,20 @@
     Warrior: 'Drze mordę i napierdala. Proste jak cep.'
   };
 
+  // Gdzie rasa zaczyna grę w WoW: Forever. Obie frakcje Skyborne startują na Zephras Isle.
+  const START = {
+    orc: { sub: 'Valley of Trials', zone: 'Durotar' },
+    troll: { sub: 'Valley of Trials', zone: 'Durotar' },
+    undead: { sub: 'Deathknell', zone: 'Tirisfal Glades' },
+    tauren: { sub: 'Camp Narache', zone: 'Mulgore' },
+    windshaper: { sub: 'Thendal Village', zone: 'Zephras Isle' },
+    human: { sub: 'Northshire Valley', zone: 'Elwynn Forest' },
+    dwarf: { sub: 'Coldridge Valley', zone: 'Dun Morogh' },
+    gnome: { sub: 'Coldridge Valley', zone: 'Dun Morogh' },
+    nightelf: { sub: 'Shadowglen', zone: 'Teldrassil' },
+    highorder: { sub: 'Thendal Village', zone: 'Zephras Isle' }
+  };
+
   // Profesje główne w WoW: Forever (bez Jewelcrafting i Inscription).
   const PROFESSIONS = ['Alchemy', 'Blacksmithing', 'Enchanting', 'Engineering', 'Herbalism', 'Leatherworking', 'Mining', 'Skinning', 'Tailoring'];
 
@@ -124,7 +138,7 @@
 
   window.Bogowie = window.Bogowie || {};
   Object.assign(window.Bogowie, {
-    CLASSES, CLASS_COLORS, RACES, PROFESSIONS, RACE_BY_ID, RACE_MEMES, CLASS_MEMES, FACTION_PL,
+    CLASSES, CLASS_COLORS, RACES, PROFESSIONS, START, RACE_BY_ID, RACE_MEMES, CLASS_MEMES, FACTION_PL,
     randInt, shuffle, drawRound, racesOf, classesOf, runTournament, combosOf, winnerOf, comboLabel
   });
 })();
