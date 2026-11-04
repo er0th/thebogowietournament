@@ -219,12 +219,130 @@
       <path d="M44 14 L50 8 M48 18 L56 16" stroke="#f2c230" stroke-width="2"/>`
   };
 
+
+  // Profesje: własne rysunki (nie ikony z gry), na ciemnym kafelku jak w pasku akcji.
+  const TILE = c => `<rect x="2" y="2" width="60" height="60" rx="6" fill="${c}" stroke="${K}" stroke-width="3"/>`;
+  const PROFS = {
+    Alchemy: `${TILE('#24324a')}
+      <path d="M27 10 H37 V24 C48 28 52 36 50 44 C48 54 40 57 32 57 C24 57 16 54 14 44 C12 36 16 28 27 24 Z" fill="#dfe9ef" stroke="${K}" stroke-width="2.6"/>
+      <path d="M16 40 C22 37 42 37 48 40 C49 50 42 55 32 55 C22 55 15 50 16 40 Z" fill="#5fd35a"/>
+      <circle cx="26" cy="46" r="2.6" fill="#c9f7b5"/><circle cx="36" cy="49" r="1.8" fill="#c9f7b5"/><circle cx="33" cy="34" r="2" fill="#5fd35a"/><circle cx="30" cy="28" r="1.4" fill="#5fd35a"/>
+      <rect x="25" y="7" width="14" height="5" rx="1.5" fill="#9a6b3f" stroke="${K}" stroke-width="2"/>
+      <path d="M20 32 Q18 38 20 42" fill="none" stroke="#fff" stroke-width="2"/>`,
+    Blacksmithing: `${TILE('#3a2a22')}
+      <path d="M8 34 H52 C52 40 46 42 40 42 V48 H46 V54 H18 V48 H24 V42 C16 42 10 40 8 34 Z" fill="#7d8792" stroke="${K}" stroke-width="2.6"/>
+      <path d="M10 34 H50" stroke="#b9c3cc" stroke-width="2"/>
+      <path d="M36 8 L50 22" stroke="#8a5a32" stroke-width="5"/>
+      <path d="M36 8 L50 22" stroke="${K}" stroke-width="1" opacity=".4"/>
+      <rect x="26" y="10" width="20" height="10" rx="2" transform="rotate(45 36 15)" fill="#9aa4ad" stroke="${K}" stroke-width="2.4"/>
+      <path d="M14 28 L18 24 M20 30 L22 25 M8 30 L13 27" stroke="#ffb030" stroke-width="2"/>`,
+    Enchanting: `${TILE('#2b1d45')}
+      <path d="M14 52 L40 26" stroke="#c9a46a" stroke-width="5"/><path d="M14 52 L40 26" stroke="${K}" stroke-width="1.2" opacity=".5"/>
+      <circle cx="43" cy="23" r="7" fill="#c77dff" stroke="${K}" stroke-width="2.4"/>
+      <circle cx="41" cy="21" r="2" fill="#fff"/>
+      <path d="M22 14 L24 9 L26 14 L31 16 L26 18 L24 23 L22 18 L17 16 Z" fill="#e4c6ff"/>
+      <path d="M48 40 L49.5 36 L51 40 L55 41.5 L51 43 L49.5 47 L48 43 L44 41.5 Z" fill="#e4c6ff"/>
+      <circle cx="54" cy="12" r="1.8" fill="#e4c6ff"/><circle cx="34" cy="44" r="1.5" fill="#e4c6ff"/>`,
+    Engineering: `${TILE('#2e3238')}
+      <g transform="translate(26 30)"><path d="M-3 -16 H3 L4 -11 L9 -9 L13 -12 L17 -8 L14 -4 L16 1 L21 2 V8 L16 9 L14 14 L17 18 L13 22 L9 19 L4 21 L3 26 H-3 L-4 21 L-9 19 L-13 22 L-17 18 L-14 14 L-16 9 L-21 8 V2 L-16 1 L-14 -4 L-17 -8 L-13 -12 L-9 -9 L-4 -11 Z" transform="translate(0 -5) scale(.95)" fill="#c08a3e" stroke="${K}" stroke-width="2.4"/>
+      <circle cx="0" cy="0" r="6" fill="#2e3238" stroke="${K}" stroke-width="2.2"/></g>
+      <path d="M36 54 L52 38" stroke="#9aa4ad" stroke-width="6"/><path d="M36 54 L52 38" stroke="${K}" stroke-width="1" opacity=".4"/>
+      <path d="M50 30 C56 28 60 34 57 38 L53 36 L51 40 L55 42 C51 46 45 43 46 37 Z" fill="#9aa4ad" stroke="${K}" stroke-width="2.2"/>`,
+    Herbalism: `${TILE('#1f3a24')}
+      <path d="M32 56 V30" stroke="#3f8f3a" stroke-width="3.5"/>
+      <path d="M32 46 C22 46 16 40 14 34 C22 33 29 37 32 44 Z M32 42 C40 40 46 34 48 28 C40 28 34 33 32 40 Z" fill="#59b84f" stroke="${K}" stroke-width="2.2"/>
+      <g transform="translate(32 20)">${[0, 72, 144, 216, 288].map(a => `<ellipse cx="0" cy="-8" rx="5" ry="8" transform="rotate(${a})" fill="#fff4f7" stroke="${K}" stroke-width="2"/>`).join('')}
+      <circle r="4.5" fill="#f2c230" stroke="${K}" stroke-width="2"/></g>`,
+    Leatherworking: `${TILE('#3b2a1c')}
+      <path d="M14 14 C20 10 26 14 32 10 C38 14 44 10 50 14 C48 22 54 28 50 34 C54 42 48 48 50 54 C42 52 38 56 32 54 C26 56 22 52 14 54 C16 46 10 42 14 34 C10 28 16 22 14 14 Z" fill="#a8703f" stroke="${K}" stroke-width="2.6"/>
+      <path d="M20 20 C26 18 38 18 44 20 C42 28 46 38 44 46 C38 48 26 48 20 46 C22 38 18 28 20 20 Z" fill="none" stroke="#f3d9a8" stroke-width="2" stroke-dasharray="3 3"/>`,
+    Mining: `${TILE('#2f2a26')}
+      <path d="M10 54 C10 44 18 38 28 38 C36 36 46 40 54 46 V54 Z" fill="#6c6560" stroke="${K}" stroke-width="2.6"/>
+      <path d="M20 46 L24 42 L28 46 L24 50 Z M38 46 L42 43 L45 47 L41 50 Z" fill="#e0904a" stroke="${K}" stroke-width="1.6"/>
+      <path d="M22 34 L44 12" stroke="#8a5a32" stroke-width="5"/>
+      <path d="M26 6 C38 4 50 10 56 20 C48 16 40 14 34 16 C30 12 28 9 26 6 Z" fill="#9aa4ad" stroke="${K}" stroke-width="2.4"/>`,
+    Skinning: `${TILE('#33261e')}
+      <path d="M14 50 L26 38" stroke="#6b4426" stroke-width="7"/><path d="M14 50 L26 38" stroke="${K}" stroke-width="1" opacity=".5"/>
+      <path d="M22 34 L30 42" stroke="${K}" stroke-width="3"/>
+      <path d="M26 38 C34 26 44 16 54 10 C52 24 44 36 30 42 Z" fill="#cfd6dc" stroke="${K}" stroke-width="2.4"/>
+      <path d="M30 38 C38 30 44 22 50 16" fill="none" stroke="#fff" stroke-width="1.6"/>`,
+    Tailoring: `${TILE('#3a1f2c')}
+      <rect x="10" y="30" width="24" height="24" rx="3" fill="#c8b08a" stroke="${K}" stroke-width="2.4"/>
+      <rect x="13" y="34" width="18" height="16" fill="#b3202a" stroke="${K}" stroke-width="1.6"/>
+      <path d="M13 38 H31 M13 42 H31 M13 46 H31" stroke="#7a1218" stroke-width="1.2"/>
+      <path d="M38 52 L54 10" stroke="#d6dde3" stroke-width="3"/><path d="M38 52 L54 10" stroke="${K}" stroke-width=".8" opacity=".5"/>
+      <ellipse cx="52" cy="15" rx="1.2" ry="3" transform="rotate(21 52 15)" fill="${K}"/>
+      <path d="M52 15 C60 24 40 30 32 34" fill="none" stroke="#b3202a" stroke-width="2"/>`
+  };
+
+  // Lokacje startowe: małe pejzaże 160×64, rysowane od zera, w klimacie miejsca.
+  const LOCS = {
+    'Valley of Trials': `
+      <rect width="160" height="64" fill="#f0a35a"/><circle cx="128" cy="16" r="9" fill="#ffe27a"/>
+      <path d="M0 40 L14 22 H34 L42 34 L58 18 H80 L90 36 L104 26 H124 L136 40 L160 30 V64 H0 Z" fill="#b5502c" stroke="${K}" stroke-width="2.4"/>
+      <path d="M0 52 C40 46 90 56 160 48 V64 H0 Z" fill="#d07a43" stroke="${K}" stroke-width="2.4"/>
+      <path d="M24 56 L30 44 L32 56 M40 56 L45 46 L47 56" fill="#efe1c4" stroke="${K}" stroke-width="2"/>
+      <path d="M100 58 V46 L112 40 L124 46 V58 Z" fill="#8a5a32" stroke="${K}" stroke-width="2.2"/><path d="M106 40 L112 32 L118 40" fill="#b3202a" stroke="${K}" stroke-width="2"/>`,
+    Deathknell: `
+      <rect width="160" height="64" fill="#5d6b5a"/><circle cx="130" cy="14" r="8" fill="#e6efd6"/><circle cx="127" cy="12" r="7" fill="#5d6b5a"/>
+      <path d="M0 46 C30 40 60 44 90 40 C120 36 140 42 160 40 V64 H0 Z" fill="#3e4a38" stroke="${K}" stroke-width="2.4"/>
+      <path d="M22 46 V22 M22 30 L14 22 M22 28 L32 18 M22 36 L30 32" fill="none" stroke="${K}" stroke-width="3"/>
+      <path d="M118 44 V26 M118 32 L110 26 M118 30 L126 22" fill="none" stroke="${K}" stroke-width="3"/>
+      <path d="M58 56 V44 L72 36 L86 44 V56 Z" fill="#8c8f86" stroke="${K}" stroke-width="2.2"/><rect x="68" y="46" width="8" height="10" fill="${K}"/>
+      <path d="M40 56 V48 Q44 44 48 48 V56 Z M96 56 V50 Q99 47 102 50 V56 Z" fill="#a9ada3" stroke="${K}" stroke-width="1.8"/>
+      <path d="M0 58 C40 54 120 60 160 56" fill="none" stroke="#9fd39a" stroke-width="2" opacity=".6"/>`,
+    'Camp Narache': `
+      <rect width="160" height="64" fill="#8fcbea"/><path d="M110 12 Q118 6 126 12 Q134 8 138 14 H108 Z" fill="#fff"/>
+      <path d="M0 44 C30 30 60 38 90 32 C120 26 140 34 160 30 V64 H0 Z" fill="#7cb54f" stroke="${K}" stroke-width="2.4"/>
+      <path d="M0 54 C50 46 110 56 160 48 V64 H0 Z" fill="#9ccc5e" stroke="${K}" stroke-width="2.2"/>
+      <path d="M40 54 L56 24 L72 54 Z" fill="#e8d3a6" stroke="${K}" stroke-width="2.4"/><path d="M52 32 L50 20 M60 32 L62 20" stroke="${K}" stroke-width="2"/>
+      <path d="M50 54 L56 44 L62 54 Z" fill="#6b4426" stroke="${K}" stroke-width="1.8"/><path d="M46 44 H66" stroke="#b3202a" stroke-width="2"/>
+      <rect x="96" y="26" width="8" height="28" fill="#8a5a32" stroke="${K}" stroke-width="2"/><path d="M90 30 H110 L106 26 H94 Z" fill="#e0412f" stroke="${K}" stroke-width="1.8"/>
+      <circle cx="100" cy="38" r="2" fill="#f2c230"/>`,
+    'Northshire Valley': `
+      <rect width="160" height="64" fill="#9bd0f0"/>
+      <path d="M0 50 C40 42 100 50 160 44 V64 H0 Z" fill="#6fb04b" stroke="${K}" stroke-width="2.4"/>
+      ${[[12, 44], [28, 48], [134, 42], [150, 46]].map(([x, y]) => `<path d="M${x} ${y} V${y + 8}" stroke="#6b4426" stroke-width="3"/><circle cx="${x}" cy="${y - 6}" r="9" fill="#3f8f3a" stroke="${K}" stroke-width="2"/>`).join('')}
+      <rect x="58" y="28" width="44" height="26" fill="#d9d2c3" stroke="${K}" stroke-width="2.4"/>
+      <path d="M54 30 L80 14 L106 30 Z" fill="#2f5fb8" stroke="${K}" stroke-width="2.4"/>
+      <rect x="84" y="8" width="12" height="24" fill="#d9d2c3" stroke="${K}" stroke-width="2.2"/><path d="M82 10 L90 0 L98 10 Z" fill="#2f5fb8" stroke="${K}" stroke-width="2"/>
+      <path d="M74 54 V44 Q80 38 86 44 V54 Z" fill="#6b4426" stroke="${K}" stroke-width="2"/><circle cx="68" cy="38" r="3" fill="#f2c230" stroke="${K}" stroke-width="1.4"/>`,
+    'Coldridge Valley': `
+      <rect width="160" height="64" fill="#b9d6ea"/>
+      <path d="M0 44 L26 14 L44 32 L70 6 L96 34 L114 18 L140 42 L160 28 V64 H0 Z" fill="#8e9aa8" stroke="${K}" stroke-width="2.4"/>
+      <path d="M20 21 L26 14 L32 20 L28 22 Z M62 15 L70 6 L78 15 L72 17 L68 14 Z M108 23 L114 18 L120 24 Z" fill="#fff" stroke="${K}" stroke-width="1.6"/>
+      <path d="M0 52 C40 46 110 54 160 48 V64 H0 Z" fill="#f4f8fb" stroke="${K}" stroke-width="2.2"/>
+      ${[[30, 52], [44, 54], [124, 50], [140, 52]].map(([x, y]) => `<path d="M${x} ${y - 18} L${x + 7} ${y} H${x - 7} Z" fill="#2f6b4a" stroke="${K}" stroke-width="2"/><path d="M${x - 4} ${y - 8} L${x} ${y - 13} L${x + 4} ${y - 8}" fill="none" stroke="#fff" stroke-width="1.6"/>`).join('')}
+      <path d="M78 56 V46 Q86 38 94 46 V56 Z" fill="#7a6a5a" stroke="${K}" stroke-width="2"/><rect x="83" y="48" width="6" height="8" fill="#ffb030"/>
+      ${[[18, 10], [52, 22], [100, 8], [150, 14]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#fff"/>`).join('')}`,
+    Shadowglen: `
+      <rect width="160" height="64" fill="#2b2350"/><circle cx="26" cy="14" r="8" fill="#e8e4ff"/>
+      <path d="M0 52 C40 46 110 54 160 48 V64 H0 Z" fill="#2f5a3e" stroke="${K}" stroke-width="2.4"/>
+      <path d="M72 64 C76 50 74 34 70 22 H90 C86 34 84 50 88 64 Z" fill="#6b4a6e" stroke="${K}" stroke-width="2.4"/>
+      <path d="M44 26 C40 8 70 -2 80 4 C92 -2 122 8 116 26 C126 32 110 40 98 34 C88 40 72 40 62 34 C50 40 34 32 44 26 Z" fill="#4c8f6a" stroke="${K}" stroke-width="2.4"/>
+      <path d="M60 20 C66 14 74 16 78 12 M88 14 C94 18 100 16 106 22" fill="none" stroke="#7fd3a0" stroke-width="2"/>
+      ${[[30, 40], [50, 46], [112, 42], [134, 36], [96, 50]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#c8ff8a"/>`).join('')}
+      ${[[110, 8], [140, 20], [60, 6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1" fill="#fff"/>`).join('')}`,
+    'Thendal Village': `
+      <rect width="160" height="64" fill="#7ec3ef"/>
+      <path d="M8 50 Q20 42 32 50 Q44 44 52 52 H8 Z M112 54 Q124 46 136 54 Q146 48 156 56 H112 Z" fill="#fff" opacity=".9"/>
+      <path d="M44 30 C60 22 104 22 118 30 L104 44 C96 54 86 58 80 60 C74 58 64 54 58 44 Z" fill="#8a6a4a" stroke="${K}" stroke-width="2.4"/>
+      <path d="M44 30 C60 22 104 22 118 30 C104 34 60 34 44 30 Z" fill="#7cc06a" stroke="${K}" stroke-width="2.2"/>
+      <path d="M70 28 V18 L78 12 L86 18 V28 Z" fill="#f4ead2" stroke="${K}" stroke-width="2"/><path d="M68 18 L78 8 L88 18 Z" fill="#e0412f" stroke="${K}" stroke-width="2"/>
+      <path d="M96 28 V20 M96 20 C100 14 106 16 104 20" fill="none" stroke="${K}" stroke-width="2"/><circle cx="96" cy="18" r="4" fill="#4c9a4a" stroke="${K}" stroke-width="1.6"/>
+      <path d="M10 18 C20 12 30 22 40 16 M120 14 C130 8 140 18 150 12 M18 30 C24 26 30 32 36 28" fill="none" stroke="#fff" stroke-width="2.2"/>`
+  };
+  const wide = (inner, label) =>
+    `<svg class="loc-art" viewBox="0 0 160 64" role="img" aria-label="${label}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">${inner}</svg>`;
+
   window.Bogowie = window.Bogowie || {};
   window.Bogowie.Icons = {
     faction: f => wrap(FACTIONS[f] || MYSTERY, f),
     race: id => wrap(RACES[id] || MYSTERY, id),
     cls: c => wrap(CLASSES[c] || MYSTERY, c),
     mystery: () => wrap(MYSTERY, '?'),
+    prof: p => wrap(PROFS[p] || MYSTERY, p),
+    loc: sub => (LOCS[sub] ? wide(LOCS[sub], sub) : ''),
     art: (name, label) => wrap(ARTS[name] || ARTS.soon, label || name).replace('class="ico"', 'class="ico art"')
   };
 })();

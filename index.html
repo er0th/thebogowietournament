@@ -380,7 +380,7 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .char-slot p{margin:6px 0}
 .char-name{font-weight:700;font-size:18px;overflow-wrap:anywhere}
 .profs{display:flex;flex-wrap:wrap;gap:6px}
-.prof-chip{display:inline-block;padding:2px 8px;border:2px solid var(--line);background:var(--bg2);font-size:13px}
+.prof-chip{display:inline-flex;align-items:center;gap:6px;padding:2px 8px 2px 3px;border:2px solid var(--line);background:var(--bg2);font-size:13px}
 .char-form{border:0;border-left:4px solid var(--cc,var(--line));margin:0;padding:4px 0 4px 12px}
 .save-row{margin-top:14px;justify-content:center}
 .char-form label{display:block;font-size:13px;color:var(--muted);margin-top:6px}
@@ -391,7 +391,8 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .chars-sum .panel{margin:0 0 10px}
 .chars-sum .locs{grid-column:1 / -1}
 .loc-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));margin-top:8px}
-.loc{background:var(--bg2);border:2px solid var(--line);padding:10px 12px}
+.loc{background:var(--bg2);border:2px solid var(--line);padding:0 12px 10px}
+.loc-art{display:block;width:calc(100% + 24px);height:auto;aspect-ratio:160/58;margin:0 -12px 10px;border-bottom:2px solid var(--line)}
 .loc h4{margin:0 0 8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:17px}
 .loc h4 .cnt{margin-left:auto;font-family:var(--head);font-weight:400;font-size:20px;color:var(--gold)}
 .loc ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
@@ -403,10 +404,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .slot-tag.main{background:var(--gold);color:var(--ink);border-color:var(--gold)}
 .sum-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
 .sum-list li{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:5px 8px;border-left:4px solid var(--cc,var(--line));background:var(--bg2)}
-.chars-sum .panel:last-child .sum-list li{grid-template-columns:1fr auto}
+.chars-sum .panel:last-child .sum-list li{grid-template-columns:auto 1fr auto}
 .sum-list li b{font-family:var(--head);font-weight:400;font-size:22px;min-width:1.5em;text-align:right}
 .sum-list li.zero{opacity:.4}
 .sum-name{overflow-wrap:anywhere}
+.sum-list .mini .ico{width:30px;height:30px}
+.prof-chip .mini .ico{width:24px;height:24px}
 @media (max-width:700px){.chars-sum{grid-template-columns:1fr}}
 #rollDialog .big-warn{font-size:22px;line-height:1.2}
 @media (max-width:860px){.nav .nav-top{width:calc((100% - 14px) / 2)}}
@@ -550,12 +553,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611041345"></script>
+<script src="config.js?v=202611041349"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611041345"></script>
-<script src="js/icons.js?v=202611041345"></script>
-<script src="js/sfx.js?v=202611041345"></script>
-<script src="js/backend.js?v=202611041345"></script>
-<script src="js/app.js?v=202611041345"></script>
+<script src="js/core.js?v=202611041349"></script>
+<script src="js/icons.js?v=202611041349"></script>
+<script src="js/sfx.js?v=202611041349"></script>
+<script src="js/backend.js?v=202611041349"></script>
+<script src="js/app.js?v=202611041349"></script>
 </body>
 </html>

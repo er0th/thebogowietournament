@@ -993,7 +993,7 @@
       <p class="char-name">${c.name ? esc(c.name) : '<span class="muted">bez imienia</span>'}</p>
       <p>${comboChip(c.race_id, c.class)} <span class="mini fac">${I.faction(B.RACE_BY_ID[c.race_id] ? B.RACE_BY_ID[c.race_id].faction : 'Horde')}</span></p>
       ${B.START[c.race_id] ? `<p class="muted small">Start: ${esc(B.START[c.race_id].sub)}, ${esc(B.START[c.race_id].zone)}</p>` : ''}
-      <p class="profs">${profs.length ? profs.map(x => `<span class="prof-chip">${esc(x)}</span>`).join('') : '<span class="muted small">bez profesji, czysty lump</span>'}</p>
+      <p class="profs">${profs.length ? profs.map(x => `<span class="prof-chip"><span class="mini">${I.prof(x)}</span>${esc(x)}</span>`).join('') : '<span class="muted small">bez profesji, czysty lump</span>'}</p>
     </div>`;
   }
 
@@ -1064,7 +1064,7 @@
       return `<li class="${tot(k) ? '' : 'zero'}" style="--cc:${B.CLASS_COLORS[k]}"><span class="mini">${I.cls(k)}</span><span class="sum-name">${esc(k)}</span><b>${tot(k)}</b><span class="muted small">${v.main} main · ${v.alt} alt</span></li>`;
     }).join('');
     const profRows = B.PROFESSIONS.slice().sort((a, b) => (prof[b] || 0) - (prof[a] || 0) || a.localeCompare(b)).map(k =>
-      `<li class="${prof[k] ? '' : 'zero'}"><span class="sum-name">${esc(k)}</span><b>${prof[k] || 0}</b></li>`).join('');
+      `<li class="${prof[k] ? '' : 'zero'}"><span class="mini">${I.prof(k)}</span><span class="sum-name">${esc(k)}</span><b>${prof[k] || 0}</b></li>`).join('');
     const mains = state.chars.filter(c => c.slot === 'main').length, alts = state.chars.length - mains;
     // Startowe lokacje osobno dla mainów i altów: kto zaczyna w danym miejscu.
     const fac = c => (B.RACE_BY_ID[c.race_id] || {}).faction || 'Horde';
@@ -1078,7 +1078,7 @@
       const tiles = Object.values(locs).sort((a, b) => b.list.length - a.list.length || a.st.sub.localeCompare(b.st.sub)).map(l => {
         const people = l.list.slice().sort((a, b) => a.nick.localeCompare(b.nick, 'pl')).map(c =>
           `<li style="--cc:${B.CLASS_COLORS[c.class] || '#999'}">${avatar(c.nick, 24)}<b>${esc(c.nick)}</b><span class="mini fac">${I.faction(fac(c))}</span><span class="loc-char">${esc(c.name || '')}</span><span class="muted small">${esc(raceName(c.race_id))} ${esc(c.class)}</span></li>`).join('');
-        return `<div class="loc"><h4>${esc(l.st.sub)} <span class="muted small">${esc(l.st.zone)}</span><span class="cnt">×${l.list.length}</span></h4><ul>${people}</ul></div>`;
+        return `<div class="loc">${I.loc(l.st.sub)}<h4>${esc(l.st.sub)} <span class="muted small">${esc(l.st.zone)}</span><span class="cnt">×${l.list.length}</span></h4><ul>${people}</ul></div>`;
       }).join('');
       return `<h4 class="loc-head"><span class="slot-tag ${slot}">${SLOT_PL[slot]}y</span></h4>` +
         (tiles ? `<div class="loc-grid">${tiles}</div>` : `<p class="muted small">${slot === 'alt' ? 'Nikt jeszcze nie wpisał alta.' : 'Nikt jeszcze nie wpisał maina.'}</p>`);
