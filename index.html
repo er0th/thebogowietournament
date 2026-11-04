@@ -57,8 +57,9 @@ header.top{padding:28px 0 10px}
 
 /* nav */
 .nav{display:flex;gap:10px;flex-wrap:wrap;margin:26px 0 8px;position:sticky;top:0;z-index:20;padding:10px 0;background:linear-gradient(var(--bg) 70%,transparent)}
-.nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
-.nav a{font-family:var(--head);text-transform:uppercase;text-decoration:none;color:var(--text);padding:16px 18px;border:4px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);letter-spacing:.04em;font-size:clamp(18px,2.4vw,30px);text-align:center;line-height:1;transition:transform .12s,background .12s}
+.nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.nav .nav-top{grid-column:1 / -1;justify-self:center;width:calc((100% - 42px) / 4)}
+.nav a{font-family:var(--head);text-transform:uppercase;text-decoration:none;color:var(--text);padding:16px 18px;border:4px solid var(--ink);background:var(--panel);box-shadow:5px 5px 0 var(--ink);letter-spacing:.04em;font-size:clamp(22px,2.8vw,34px);text-align:center;line-height:1;transition:transform .12s,background .12s}
 .nav a[aria-current=page]{background:var(--gold);color:var(--ink);transform:rotate(-2deg) scale(1.03)}
 .nav a:hover{border-color:var(--gold);transform:translateY(-2px)}
 .nav a[aria-current=page]:hover{transform:rotate(-2deg) scale(1.05)}
@@ -385,7 +386,7 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
 .char-form select.input:disabled{opacity:.5}
 .char-form .go-row{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
 #rollDialog .big-warn{font-size:22px;line-height:1.2}
-@media (max-width:860px){.nav a:last-child{grid-column:span 2}}
+@media (max-width:860px){.nav .nav-top{width:calc((100% - 14px) / 2)}}
 @media (max-width:560px){.char-slots{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
@@ -433,10 +434,10 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
       <div class="profile-chip" id="profileChip"></div>
     </header>
     <nav class="nav" aria-label="Sekcje">
+      <a href="#postacie" class="nav-top">Postacie</a>
       <a href="#random">Randomizer</a>
       <a href="#turniej">Turniej</a>
       <a href="#gracze">Gracze</a>
-      <a href="#postacie">Postacie</a>
       <a href="#kalendarz">Kalendarz</a>
     </nav>
 
@@ -526,12 +527,12 @@ footer{padding:30px 0 40px;color:var(--muted);font-size:13px;border-top:2px dash
   </div>
 </dialog>
 
-<script src="config.js?v=202611041326"></script>
+<script src="config.js?v=202611041328"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js"></script>
-<script src="js/core.js?v=202611041326"></script>
-<script src="js/icons.js?v=202611041326"></script>
-<script src="js/sfx.js?v=202611041326"></script>
-<script src="js/backend.js?v=202611041326"></script>
-<script src="js/app.js?v=202611041326"></script>
+<script src="js/core.js?v=202611041328"></script>
+<script src="js/icons.js?v=202611041328"></script>
+<script src="js/sfx.js?v=202611041328"></script>
+<script src="js/backend.js?v=202611041328"></script>
+<script src="js/app.js?v=202611041328"></script>
 </body>
 </html>
